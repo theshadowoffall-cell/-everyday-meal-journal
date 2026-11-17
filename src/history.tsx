@@ -1,3 +1,4 @@
+import { calorieTotal } from "./calories";
 import { categories, type Meal } from "./types";
 import { Photo, Icon } from "./ui";
 export function MealRows({
@@ -19,6 +20,12 @@ export function MealRows({
             {rows.map((m) => (
               <button
                 className="meal-row"
+                aria-label={
+                  m.title
+                    ? `${m.title} ${m.items.map((i) => i.name).join(" + ")}`
+                    : m.items.map((i) => i.name).join(" + ")
+                }
+                aria-describedby={`calories-${m.id}`}
                 key={m.id}
                 onClick={() => onClick(m)}
               >
@@ -30,6 +37,12 @@ export function MealRows({
                   <strong>
                     {m.title || m.items.map((i) => i.name).join(" + ")}
                   </strong>
+                  <small id={`calories-${m.id}`}>
+                    {(() => {
+                      const t = calorieTotal(m.items);
+                      return `${Math.round(t.known)} kcal${t.complete ? "" : " · incomplete"}`;
+                    })()}
+                  </small>
                   {(m.title || m.notes) && (
                     <small>
                       {m.title

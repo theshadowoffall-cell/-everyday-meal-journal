@@ -16,7 +16,7 @@ export async function exportJSON(d: Data) {
     })),
   );
   const text = JSON.stringify({
-    schemaVersion: 1,
+    schemaVersion: 2,
     exportedAt: new Date().toISOString(),
     data: { ...d, images },
   });
@@ -69,7 +69,7 @@ export async function importJSON(
     throw Error("This is not valid JSON. Current data is unchanged.");
   }
   assert(
-    raw?.schemaVersion === 1,
+    raw?.schemaVersion === 1 || raw?.schemaVersion === 2,
     "Unsupported backup version. Current data is unchanged.",
   );
   assert(

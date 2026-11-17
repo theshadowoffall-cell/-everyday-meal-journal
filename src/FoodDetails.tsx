@@ -1,3 +1,4 @@
+import { validCalorieValue, recipePerServing } from "./calories";
 import { useState } from "react";
 import type { Food, ImageAsset } from "./types";
 import { base } from "./types";
@@ -29,6 +30,23 @@ export function FoodDetails({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [image, setImage] = useState<ImageAsset>();
+  function updateRecipe(recipe: NonNullable<Food["recipe"]>) {
+    const per = recipePerServing(recipe.items, recipe.servings);
+    setF({
+      ...f,
+      recipe,
+      calorie:
+        per === undefined
+          ? undefined
+          : {
+              calories: per,
+              basisQuantity: 1,
+              quantity: 1,
+              unit: "serving",
+              source: "Recipe calculated from saved ingredient values",
+            },
+    });
+  }
   async function persist(next = f) {
     setBusy(true);
     try {
@@ -48,7 +66,11 @@ export function FoodDetails({
         editing ? (
           <button
             className="primary full"
-            disabled={!f.name.trim() || busy}
+            disabled={
+              !f.name.trim() ||
+              busy ||
+              (!!f.calorie && !validCalorieValue(f.calorie))
+            }
             onClick={() => void persist()}
           >
             {busy ? "Saving…" : "Save food"}
@@ -73,6 +95,140 @@ export function FoodDetails({
               onChange={(e) => setF({ ...f, name: e.target.value })}
             />
           </label>
+          {f.recipe ? (
+            <fieldset>
+              <legend>Edit recipe</legend>
+              <label>
+                Recipe servings
+                <input
+                  type="number"
+                  min="0.01"
+                  step="any"
+                  value={f.recipe.servings}
+                  onChange={(e) => {
+                    const n = Number(e.target.value);
+                    if (n > 0) updateRecipe({ ...f.recipe!, servings: n });
+                  }}
+                />
+              </label>
+              {f.recipe.items.map((item, index) => (
+                <div key={index}>
+                  <strong>{item.name}</strong>
+                  {item.calorie ? (
+                    <label>
+                      Quantity ({item.calorie.unit})
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="any"
+                        value={item.calorie.quantity}
+                        onChange={(e) => {
+                          const n = Number(e.target.value);
+                          if (n > 0)
+                            updateRecipe({
+                              ...f.recipe!,
+                              items: f.recipe!.items.map((i, k) =>
+                                k === index
+                                  ? {
+                                      ...i,
+                                      calorie: { ...i.calorie!, quantity: n },
+                                    }
+                                  : i,
+                              ),
+                            });
+                        }}
+                      />
+                    </label>
+                  ) : (
+                    <p>Calories unknown</p>
+                  )}
+                  {f.recipe!.items.length > 1 && (
+                    <button
+                      onClick={() =>
+                        updateRecipe({
+                          ...f.recipe!,
+                          items: f.recipe!.items.filter((_, k) => k !== index),
+                        })
+                      }
+                    >
+                      Remove {item.name}
+                    </button>
+                  )}
+                </div>
+              ))}
+              <p>
+                {f.calorie
+                  ? `${Math.round(f.calorie.calories)} kcal per serving`
+                  : "Recipe calories incomplete"}
+              </p>
+            </fieldset>
+          ) : (
+            <>
+              <label>
+                Calories for saved food (optional)
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={f.calorie?.calories ?? ""}
+                  onChange={(e) =>
+                    setF({
+                      ...f,
+                      calorie:
+                        e.target.value === ""
+                          ? undefined
+                          : {
+                              calories: Number(e.target.value),
+                              basisQuantity: f.calorie?.basisQuantity || 1,
+                              quantity: f.calorie?.basisQuantity || 1,
+                              unit: f.calorie?.unit || "serving",
+                              source: "User entered food label",
+                            },
+                    })
+                  }
+                />
+              </label>
+              {f.calorie && (
+                <>
+                  <label>
+                    Serving size
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="any"
+                      value={f.calorie.basisQuantity}
+                      onChange={(e) =>
+                        setF({
+                          ...f,
+                          calorie: {
+                            ...f.calorie!,
+                            basisQuantity: Number(e.target.value),
+                            quantity: Number(e.target.value),
+                          },
+                        })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Serving unit
+                    <input
+                      value={f.calorie.unit}
+                      onChange={(e) =>
+                        setF({
+                          ...f,
+                          calorie: { ...f.calorie!, unit: e.target.value },
+                        })
+                      }
+                    />
+                  </label>
+                  <p className="muted">
+                    Copy the serving and calories from the label. Use g, ml, or
+                    a named serving.
+                  </p>
+                </>
+              )}
+            </>
+          )}
           <label>
             Aliases <span className="muted">one per line</span>
             <textarea
@@ -174,6 +330,25 @@ export function FoodDetails({
               {f.archived ? " · Archived" : ""}
             </p>
           </div>
+          {f.calorie && (
+            <p>
+              {f.calorie.calories} kcal per {f.calorie.basisQuantity}{" "}
+              {f.calorie.unit} · {f.calorie.source}
+            </p>
+          )}
+          {f.recipe && (
+            <>
+              <h3>Recipe · {f.recipe.servings} servings</h3>
+              {f.recipe.items.map((item, n) => (
+                <p key={n}>
+                  {item.name}
+                  {item.calorie
+                    ? ` · ${item.calorie.quantity} ${item.calorie.unit}`
+                    : " · calories unknown"}
+                </p>
+              ))}
+            </>
+          )}
           {f.description && <p>{f.description}</p>}
           {f.ingredients && (
             <>

@@ -1,3 +1,4 @@
+import { validCalorieValue } from "./calories";
 import { categories, type Data, type Item } from "./types";
 import { validDate, localDate } from "./dates";
 export const LIMITS = {
@@ -24,8 +25,22 @@ function optionalText(x: any, keys: string[]) {
 }
 function itemCheck(i: any, allowEmpty = false) {
   assert(
+    i?.calorieInputEmpty === undefined ||
+      typeof i.calorieInputEmpty === "boolean",
+    "Invalid pending calorie field.",
+  );
+  if (!allowEmpty)
+    assert(
+      !i?.calorieInputEmpty,
+      "Complete or clear the pending calorie value.",
+    );
+  assert(
     obj(i) && str(i.name) && (allowEmpty || i.name.trim()),
     "Every item needs a name.",
+  );
+  assert(
+    i.calorie === undefined || validCalorieValue(i.calorie),
+    "Invalid calorie information.",
   );
   optionalText(i, ["description", "ingredients", "notes"]);
   assert(i.imageId === undefined || id(i.imageId), "Invalid photo ID.");
@@ -119,6 +134,10 @@ export function validateData(d: any): asserts d is Data {
   assert(d.drafts.length <= 1, "Only one draft is supported.");
   for (const f of d.foods) {
     baseCheck(f);
+    assert(
+      f.calorie === undefined || validCalorieValue(f.calorie),
+      "Invalid saved-food calories.",
+    );
     optionalText(f, ["description", "ingredients", "notes", "type"]);
     assert(
       str(f.name) &&
@@ -127,6 +146,19 @@ export function validateData(d: any): asserts d is Data {
         typeof f.archived === "boolean",
       "Invalid saved food.",
     );
+    if (f.recipe !== undefined) {
+      assert(
+        obj(f.recipe) &&
+          Array.isArray(f.recipe.items) &&
+          f.recipe.items.length > 0 &&
+          f.recipe.items.length <= 100 &&
+          Number.isFinite(f.recipe.servings) &&
+          f.recipe.servings > 0 &&
+          f.recipe.servings <= 10000,
+        "Invalid recipe.",
+      );
+      f.recipe.items.forEach((item: any) => itemCheck(item));
+    }
     if (f.aliases)
       assert(
         Array.isArray(f.aliases) && f.aliases.every(str),
@@ -144,6 +176,13 @@ export function validateData(d: any): asserts d is Data {
     );
   for (const dr of d.drafts) {
     baseCheck(dr);
+    assert(
+      dr.recipeServings === undefined ||
+        (Number.isFinite(dr.recipeServings) &&
+          dr.recipeServings > 0 &&
+          dr.recipeServings <= 10000),
+      "Invalid recipe servings.",
+    );
     assert(
       dr.id === "active" &&
         id(dr.mealId) &&
@@ -194,6 +233,7 @@ export function validateData(d: any): asserts d is Data {
       refs(x.label);
     }
     if (x.items) x.items.forEach(refs);
+    if (x.recipe) x.recipe.items.forEach(refs);
   };
   [...d.foods, ...d.meals, ...d.drafts].forEach(refs);
   assert(

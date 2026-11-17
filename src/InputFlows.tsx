@@ -172,8 +172,15 @@ export function Voice({
             const f = found.find((f) => f.id === selected);
             if (f) {
               stop();
-              const { name, description, ingredients, notes, imageId, label } =
-                f;
+              const {
+                name,
+                description,
+                ingredients,
+                notes,
+                imageId,
+                label,
+                calorie,
+              } = f;
               use({
                 name,
                 description,
@@ -181,6 +188,7 @@ export function Voice({
                 notes,
                 imageId,
                 label,
+                calorie,
                 sourceId: f.id,
               });
             }

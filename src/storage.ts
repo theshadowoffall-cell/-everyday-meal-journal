@@ -1,3 +1,4 @@
+import { recipePerServing } from "./calories";
 import { openDB, type IDBPDatabase } from "idb";
 import {
   base,
@@ -186,6 +187,7 @@ export class JournalDB {
         saveTemplate,
         dishName,
         templateId,
+        recipeServings,
         pendingText,
         ...rest
       } = dr;
@@ -205,6 +207,22 @@ export class JournalDB {
           description: dr.items.map((i) => i.name).join(" + "),
           ingredients: dr.items.map((i) => i.ingredients || i.name).join("\n"),
           notes: dr.notes,
+          recipe: {
+            items: structuredClone(dr.items),
+            servings: recipeServings || 1,
+          },
+          calorie: (() => {
+            const per = recipePerServing(dr.items, recipeServings || 1);
+            return per === undefined
+              ? undefined
+              : {
+                  calories: per,
+                  basisQuantity: 1,
+                  quantity: 1,
+                  unit: "serving",
+                  source: "Recipe calculated from saved ingredient values",
+                };
+          })(),
           favourite: false,
           archived: false,
         };

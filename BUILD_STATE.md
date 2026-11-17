@@ -28,3 +28,20 @@ Owner set Pages to main /docs. GitHub reported built; exact HTTPS root and all 1
 ## App-scale interaction update
 
 User requested disabling zoom. Added viewport scale restrictions, touch-action rules that preserve panning, Safari gesture/multi-touch guards, and 16px file-input text to avoid focus zoom. Device accessibility overrides may still control zoom. TypeScript/Vite production build and portable asset checks passed; native iPhone gesture verification remains pending.
+
+## Calorie feature research
+
+Read primary USDA and Open Food Facts API/licensing pages and recorded initial findings in CALORIE_RESEARCH.md. Implementation, migration, testing and deployment remain outstanding. Production was not changed.
+
+## Calorie calculation groundwork
+
+Added isolated calorie arithmetic and four passing tests for serving-basis calculations, decimals, incomplete totals, malformed inputs and incomplete recipes. Production build passed. These functions are not connected to the UI or storage yet; no calorie features have been deployed. Food catalogue, quantities, daily totals, recipe editor, validation/migration, backup compatibility, integration tests and deployment remain outstanding.
+
+## Calorie interface work in progress
+
+Added a draft interface for user-entered calories per serving and serving quantity; daily and meal rows display known totals and label unknown items as incomplete. Calorie fields are validated on stored meal items. The existing backup envelope can preserve optional item fields. The 33 existing/unit tests passed after an accessible meal-row label update. This is an unfinished local change: catalogue search, reusable food and recipe calorie snapshots, unit/portion workflows, complete backup/migration and UI integration tests, stress tests and deployment remain outstanding. Do not deploy this incomplete slice. Previous build preceded the last accessibility markup edit, so rerun the final build before any deployment.
+
+
+## Calorie upgrade: local production candidate
+
+Implemented locally: USDA SR Legacy catalogue (7,793 foods, documented whole-portion gram weights), local search, quantities, calories, daily/meal/item totals with incomplete states, custom foods, recipe creation/editing, snapshot preservation, version 2 backup export and version 1 import. Old records are optional-field compatible. Reviewed failures, fixed a rendering refresh race and ambiguous fractional/multi-piece portion calculations. Final TypeScript/Vite build and static asset checks passed; 40 tests passed in six files, including isolated calorie UI, storage, backup and failure simulations. See VALIDATION.md. Real iPhone, native browser rendering/viewport screenshots and device durability remain unverified because supported browser/iPhone access was unavailable. Open Food Facts live search is not integrated; packaged labels can be entered manually. Not deployed: user explicitly requested local work first and will provide GitHub access afterward.

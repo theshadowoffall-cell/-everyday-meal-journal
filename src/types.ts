@@ -1,3 +1,4 @@
+import type { CalorieValue } from "./calories";
 import { clock } from "./dates";
 export const categories = [
   "Breakfast",
@@ -16,6 +17,8 @@ export type Base = {
 export type Label = { text: string; reviewed: boolean; imageId?: string };
 export type Food = Base & {
   name: string;
+  calorie?: CalorieValue;
+  recipe?: { items: Item[]; servings: number };
   aliases?: string[];
   type?: string;
   description?: string;
@@ -28,6 +31,8 @@ export type Food = Base & {
 };
 export type Item = {
   name: string;
+  calorie?: CalorieValue;
+  calorieInputEmpty?: boolean;
   sourceId?: string;
   description?: string;
   ingredients?: string;
@@ -61,6 +66,7 @@ export type Draft = Meal & {
   saveTemplate: boolean;
   dishName: string;
   templateId: string;
+  recipeServings?: number;
   pendingText?: string;
 };
 export type Preferences = {
@@ -97,7 +103,7 @@ export const base = (id: string = newId()): Base => ({
   updatedAt: timestamp(),
 });
 export function snapshot(f: Food): Item {
-  const { name, description, ingredients, notes, imageId, label } = f;
+  const { name, description, ingredients, notes, imageId, label, calorie } = f;
   return structuredClone({
     name,
     description,
@@ -105,6 +111,7 @@ export function snapshot(f: Food): Item {
     notes,
     imageId,
     label,
+    calorie,
     sourceId: f.id,
   });
 }

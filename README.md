@@ -55,3 +55,12 @@ Supported limits: full-backup capacity 24 MiB, at most 4,000 combined foods/meal
 See `VALIDATION.md` for executed evidence, simulated services and outstanding device checks; `BUILD_STATE.md` records milestones. Source includes the dependency lockfile, bundled OCR assets and licence notices. Source and production ZIPs are packaged separately in the workspace's `work/delivery` directory. The client-specified `/codex/browser/.../output` path could not be created in this Cloud environment because `/codex` is on a read-only filesystem; no broken download link is presented.
 
 The written composition was used because the supplied ChatGPT Library boards were not available as local images. Screenshot comparison, 320/390/430 layout observation, large-text/zoom, safe-area and iPhone keyboard checks are outstanding. No pixel-match or native iPhone verification is claimed.
+
+
+## Calorie data and calculations
+
+The local catalogue contains 7,793 foods extracted from USDA FoodData Central's SR Legacy CSV (April 2018). Data and documented food portions are public domain/CC0; attribution: USDA FoodData Central, https://fdc.nal.usda.gov/ . The data describe a specific food and preparation, so choose the closest match. Values are per 100 g; household portions use only gram weights supplied by USDA. The source identifier and selected serving basis are saved in each meal snapshot. Rebuild the catalogue with `python3 scripts/build-catalog.py` using the USDA public download; no API key or food-search request is used at runtime.
+
+Open Food Facts offers branded products under ODbL/DbCL with distinct attribution and reuse requirements; this build does not integrate it. For a packaged food, enter the calories and serving size from its label as a saved food. No barcode lookup or comprehensive branded-product database is included.
+
+Select ingredients and their quantities, then choose **Save as a dish** and enter the number of servings to create a reusable recipe. Values are calculated from saved ingredient snapshots. If any ingredient is unknown, the recipe calorie value remains unknown. Calorie totals on Today and meal rows show the known sum and explicitly identify incomplete records. Values are rounded for display only. Backups now export version 2; version 1 remains importable. Backups made by this version should be restored into this version or later.

@@ -1,3 +1,4 @@
+import { calorieTotal } from "./calories";
 import { useState } from "react";
 import { dateLabel, localDate, monthCells, shiftMonth, week } from "./dates";
 import { completedWeeks, report } from "./reports";
@@ -136,6 +137,19 @@ export function Progress({
             ? dateLabel(selected, { month: "long", day: "numeric" })
             : "Meal history"}
         </h2>
+        {selected &&
+          meals.length > 0 &&
+          (() => {
+            const total = calorieTotal(meals.flatMap((m) => m.items));
+            return (
+              <p>
+                Calories: {Math.round(total.known)} kcal
+                {total.complete
+                  ? ""
+                  : ` · incomplete (${total.unknown} unknown)`}
+              </p>
+            );
+          })()}
         {selected && selected > today && (
           <p>Imported future history. Excluded from elapsed-period totals.</p>
         )}

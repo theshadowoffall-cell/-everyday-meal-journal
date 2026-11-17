@@ -1,3 +1,4 @@
+import { itemCalories } from "./calories";
 import { useEffect, useRef, useState } from "react";
 import { JournalDB, createDraft, type Undo } from "./storage";
 import {
@@ -53,6 +54,7 @@ export function App({ database }: { database?: JournalDB }) {
   const persistedRevision = useRef(0);
   async function refresh() {
     const next = await db.read();
+    if (next.meta[0].value < generation.current) return;
     if (next.meta[0].value !== generation.current) {
       setFlow(undefined);
       setScanTarget(undefined);
@@ -61,7 +63,13 @@ export function App({ database }: { database?: JournalDB }) {
         "Data was restored in another tab. Copy any unsaved draft text before reloading. Older writes are blocked.",
       );
     }
-    setData(next);
+    setData((previous) =>
+      previous.meta[0].value > next.meta[0].value ||
+      (previous.meta[0].value === next.meta[0].value &&
+        (previous.meta[0].counter || 0) > (next.meta[0].counter || 0))
+        ? previous
+        : next,
+    );
   }
   useEffect(() => {
     let live = true;
@@ -203,11 +211,11 @@ export function App({ database }: { database?: JournalDB }) {
       const u = await db.saveMeal(dr, generation.current);
       draftRef.current = undefined;
       persistedRevision.current = 0;
+      await refresh();
       setDraft(undefined);
       setEditor(false);
       setUndo(u);
       setMessage("Meal saved");
-      await refresh();
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -299,7 +307,7 @@ export function App({ database }: { database?: JournalDB }) {
     else void perform(() => pin(f));
   }
   async function workout(state: "workout" | "rest" | "clear", s = date) {
-    const old = data.workouts.find((w) => w.id === s);
+    const old = (await db.read()).workouts.find((w) => w.id === s);
     const u =
       state === "clear"
         ? old
@@ -311,6 +319,7 @@ export function App({ database }: { database?: JournalDB }) {
             old?.revision || 0,
             generation.current,
           );
+    await refresh();
     setUndo(u);
     setMessage(
       state === "clear"
@@ -664,6 +673,14 @@ export function App({ database }: { database?: JournalDB }) {
             <div key={n}>
               <h3>{i.name}</h3>
               {i.description && <p>{i.description}</p>}
+              {i.calorie ? (
+                <p>
+                  {Math.round(itemCalories(i.calorie) ?? 0)} kcal ·{" "}
+                  {i.calorie.quantity} {i.calorie.unit} · {i.calorie.source}
+                </p>
+              ) : (
+                <p>Calories unknown</p>
+              )}
               {i.ingredients && <p className="preserve">{i.ingredients}</p>}
               {i.notes && <p>{i.notes}</p>}
               {i.imageId && (

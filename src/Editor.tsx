@@ -1,3 +1,6 @@
+import catalog from "./data/usda.json";
+import { snapshot } from "./types";
+import { itemCalories, calorieTotal } from "./calories";
 import { useState } from "react";
 import {
   categories,
@@ -36,6 +39,7 @@ export function Editor({
   const text = draft.pendingText || "";
   const setText = (value: string) => change({ ...draft, pendingText: value });
   const [query, setQuery] = useState("");
+  const [catalogQuery, setCatalogQuery] = useState("");
   const add = (i: Item) => change({ ...draft, items: [...draft.items, i] });
   const hasText = !!text.trim();
   function addText() {
@@ -53,7 +57,11 @@ export function Editor({
       footer={
         <button
           className="primary full"
-          disabled={pending || (!draft.items.length && !hasText)}
+          disabled={
+            pending ||
+            (!draft.items.length && !hasText) ||
+            draft.items.some((i) => i.calorieInputEmpty)
+          }
           onClick={() => {
             if (hasText) {
               change({
@@ -138,6 +146,173 @@ export function Editor({
           </button>
         </div>
       ))}
+      {draft.items.length > 0 &&
+        (() => {
+          const total = calorieTotal(draft.items);
+          return (
+            <p>
+              Meal: {Math.round(total.known)} kcal
+              {total.complete ? "" : ` · incomplete (${total.unknown} unknown)`}
+            </p>
+          );
+        })()}
+      {draft.items.map((item, index) => (
+        <fieldset key={`calorie-${index}`}>
+          <legend>Calories for {item.name || `item ${index + 1}`}</legend>
+          <p className="muted">
+            Optional. Enter a value from your food label; leave blank if
+            unknown.
+          </p>
+          <label>
+            Calories per serving
+            <input
+              type="number"
+              min="0"
+              step="any"
+              value={
+                item.calorieInputEmpty ? "" : (item.calorie?.calories ?? "")
+              }
+              onChange={(e) => {
+                const value = e.target.value;
+                change({
+                  ...draft,
+                  items: draft.items.map((x, n) =>
+                    n !== index
+                      ? x
+                      : {
+                          ...x,
+                          calorieInputEmpty:
+                            value === "" && !!x.calorie ? true : undefined,
+                          calorie:
+                            value === ""
+                              ? x.calorie
+                              : {
+                                  calories: Number(value),
+                                  basisQuantity: x.calorie?.basisQuantity || 1,
+                                  unit: x.calorie?.unit || "serving",
+                                  quantity: x.calorie?.quantity || 1,
+                                  source: "User entered",
+                                },
+                        },
+                  ),
+                });
+              }}
+            />
+          </label>
+          {item.calorieInputEmpty && (
+            <p className="error">
+              Enter a calorie value, or clear the calorie information.
+            </p>
+          )}
+          {item.calorie && (
+            <>
+              <button
+                type="button"
+                onClick={() =>
+                  change({
+                    ...draft,
+                    items: draft.items.map((x, n) =>
+                      n === index
+                        ? {
+                            ...x,
+                            calorie: undefined,
+                            calorieInputEmpty: undefined,
+                          }
+                        : x,
+                    ),
+                  })
+                }
+              >
+                Clear calorie information
+              </button>
+              {(() => {
+                const match = item.calorie?.source.match(
+                  /USDA FoodData Central SR Legacy, FDC (\d+)/,
+                );
+                const food =
+                  match && catalog.find((f) => f.id === Number(match[1]));
+                return food?.portions?.length ? (
+                  <label>
+                    USDA portion
+                    <select
+                      value={
+                        item.calorie?.unit === "g"
+                          ? "grams"
+                          : item.calorie?.unit
+                      }
+                      onChange={(e) => {
+                        const choice = e.target.value;
+                        const portion = food.portions?.find(
+                          (p) => p.label === choice,
+                        );
+                        const cal = portion
+                          ? {
+                              calories: (food.kcal * portion.grams) / 100,
+                              basisQuantity: 1,
+                              quantity: 1,
+                              unit: portion.label,
+                              source: `USDA FoodData Central SR Legacy, FDC ${food.id}; ${portion.grams} g per ${portion.label}`,
+                            }
+                          : {
+                              calories: food.kcal,
+                              basisQuantity: 100,
+                              quantity: 100,
+                              unit: "g",
+                              source: `USDA FoodData Central SR Legacy, FDC ${food.id}`,
+                            };
+                        change({
+                          ...draft,
+                          items: draft.items.map((x, n) =>
+                            n === index ? { ...x, calorie: cal } : x,
+                          ),
+                        });
+                      }}
+                    >
+                      <option value="grams">Grams</option>
+                      {food.portions.map((p, n) => (
+                        <option key={n} value={p.label}>
+                          {p.label} ({Math.round(p.grams * 10) / 10} g)
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null;
+              })()}
+              <label>
+                Quantity ({item.calorie.unit})
+                <input
+                  type="number"
+                  min="0.01"
+                  step="any"
+                  value={item.calorie.quantity}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value > 0)
+                      change({
+                        ...draft,
+                        items: draft.items.map((x, n) =>
+                          n === index
+                            ? {
+                                ...x,
+                                calorie: { ...item.calorie!, quantity: value },
+                              }
+                            : x,
+                        ),
+                      });
+                  }}
+                />
+              </label>
+              <p>
+                {itemCalories(item.calorie) === undefined
+                  ? "Invalid value"
+                  : `${Math.round(itemCalories(item.calorie)!)} kcal`}{" "}
+                ({item.calorie.calories} kcal per {item.calorie.basisQuantity}{" "}
+                {item.calorie.unit})
+              </p>
+            </>
+          )}
+        </fieldset>
+      ))}
       <label>
         Write a meal
         <input
@@ -191,29 +366,60 @@ export function Editor({
                 className="square"
                 aria-label={`Add ${f.name}`}
                 onClick={() => {
-                  const {
-                    name,
-                    description,
-                    ingredients,
-                    notes,
-                    imageId,
-                    label,
-                  } = f;
-                  add({
-                    name,
-                    description,
-                    ingredients,
-                    notes,
-                    imageId,
-                    label,
-                    sourceId: f.id,
-                  });
+                  add(snapshot(f));
                 }}
               >
                 <Icon name="plus" />
               </button>
             </div>
           ))}
+      </div>
+      <label>
+        Search common foods
+        <input
+          type="search"
+          placeholder="Search USDA foods"
+          value={catalogQuery}
+          onChange={(e) => setCatalogQuery(e.target.value)}
+        />
+      </label>
+      <p className="muted">
+        USDA FoodData Central, SR Legacy. Values are per 100 g; results depend
+        on preparation. Search is on this device.
+      </p>
+      <div className="picker">
+        {catalogQuery.trim().length >= 2 &&
+          catalog
+            .filter((f) =>
+              f.name.toLowerCase().includes(catalogQuery.toLowerCase()),
+            )
+            .slice(0, 30)
+            .map((f) => (
+              <div className="picker-row" key={f.id}>
+                <span className="grow">
+                  {f.name}
+                  <small> · {f.kcal} kcal per 100 g</small>
+                </span>
+                <button
+                  className="square"
+                  aria-label={`Add USDA ${f.name}`}
+                  onClick={() =>
+                    add({
+                      name: f.name,
+                      calorie: {
+                        calories: f.kcal,
+                        basisQuantity: 100,
+                        quantity: 100,
+                        unit: "g",
+                        source: `USDA FoodData Central SR Legacy, FDC ${f.id}`,
+                      },
+                    })
+                  }
+                >
+                  <Icon name="plus" />
+                </button>
+              </div>
+            ))}
       </div>
       <label>
         Meal title <span className="muted">optional</span>
@@ -246,6 +452,21 @@ export function Editor({
         />
         {draft.items.length > 1 ? "Save as a dish" : "Save to library"}
       </label>
+      {draft.saveTemplate && draft.items.length > 1 && (
+        <label>
+          Recipe yields this many servings
+          <input
+            type="number"
+            min="0.01"
+            step="any"
+            value={draft.recipeServings || 1}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              if (n > 0) change({ ...draft, recipeServings: n });
+            }}
+          />
+        </label>
+      )}
       {draft.saveTemplate && (
         <label>
           Dish name

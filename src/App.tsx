@@ -443,6 +443,15 @@ export function App({ database }: { database?: JournalDB }) {
             />
           ) : (
             <Progress
+              saveGoal={async (target, direction) => {
+                await db.prefs((p) => {
+                  const goals = p.calorieGoals || [];
+                  p.calorieGoals = goals
+                    .filter((g) => g.from !== localDate())
+                    .concat({ from: localDate(), target, direction });
+                }, generation.current);
+                await refresh();
+              }}
               data={data}
               editMeal={setHistory}
               urls={urls}

@@ -1,4 +1,3 @@
-import { calorieTotal } from "./calories";
 import { useEffect, useRef } from "react";
 import type { Data, Food, Meal } from "./types";
 import { dateLabel, localDate, week } from "./dates";
@@ -151,22 +150,11 @@ export function Today({
             {data.meals.filter((m) => m.date === date).length} entries
           </span>
         </div>
-        {(() => {
-          const entries = data.meals.filter((m) => m.date === date);
-          const total = calorieTotal(entries.flatMap((m) => m.items));
-          return entries.length ? (
-            <p>
-              Calories: {Math.round(total.known)} kcal{" "}
-              {total.complete
-                ? ""
-                : `(incomplete: ${total.unknown} item${total.unknown === 1 ? "" : "s"} unknown)`}
-            </p>
-          ) : null;
-        })()}
         <MealRows
           meals={data.meals.filter((m) => m.date === date)}
           onClick={editMeal}
           urls={urls}
+          showCalories={false}
         />
         {!data.meals.some((m) => m.date === date) && (
           <Empty>

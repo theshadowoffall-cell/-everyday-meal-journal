@@ -141,15 +141,17 @@ describe("actual screen interactions with persisted IndexedDB", () => {
     await screen.findByRole("dialog");
     click("Edit meal");
     await screen.findByRole("dialog", { name: "Edit meal" });
-    fireEvent.change(screen.getByLabelText(/Meal title/), {
-      target: { value: "Breakfast title" },
+    expect(screen.queryByLabelText(/Meal title/)).toBeNull();
+    expect(screen.queryByLabelText(/^Notes/)).toBeNull();
+    fireEvent.change(screen.getByLabelText("Category"), {
+      target: { value: "Lunch" },
     });
     click("Save meal");
     await waitFor(async () =>
-      expect((await db.read()).meals[0].title).toBe("Breakfast title"),
+      expect((await db.read()).meals[0].category).toBe("Lunch"),
     );
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-    click("Breakfast title Eggs on toast");
+    click("Eggs on toast");
     await screen.findByRole("dialog");
     click("Copy to a new meal");
     await screen.findByRole("dialog", { name: "Add meal" });
@@ -157,7 +159,9 @@ describe("actual screen interactions with persisted IndexedDB", () => {
     click("Save meal");
     await waitFor(async () => expect((await db.read()).meals).toHaveLength(2));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-    click("Eggs on toast");
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Eggs on toast" })[0],
+    );
     click("Delete meal");
     await waitFor(async () => expect((await db.read()).meals).toHaveLength(1));
     click("Undo");

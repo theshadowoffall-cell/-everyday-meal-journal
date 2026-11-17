@@ -76,6 +76,11 @@ export type Preferences = {
   lastExport?: string;
   reminderDismissed?: boolean;
   speechConsent?: boolean;
+  calorieGoals?: Array<{
+    from: string;
+    target: number;
+    direction: "at_or_below" | "at_or_above";
+  }>;
   voiceMode?: "manual" | "automatic";
   scanMode?: "manual" | "automatic";
 };

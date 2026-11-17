@@ -3,9 +3,10 @@ import {
   searchFoods,
   identifyFood,
   sourceText,
+  catalogServing,
 } from "./catalog";
 import { snapshot } from "./types";
-import { itemCalories, calorieTotal } from "./calories";
+import { itemCalories } from "./calories";
 import { useState } from "react";
 import {
   categories,
@@ -151,16 +152,6 @@ export function Editor({
           </button>
         </div>
       ))}
-      {draft.items.length > 0 &&
-        (() => {
-          const total = calorieTotal(draft.items);
-          return (
-            <p>
-              Meal: {Math.round(total.known)} kcal
-              {total.complete ? "" : ` · incomplete (${total.unknown} unknown)`}
-            </p>
-          );
-        })()}
       {draft.items.map((item, index) => (
         <fieldset key={`calorie-${index}`}>
           <legend>Calories for {item.name || `item ${index + 1}`}</legend>
@@ -421,7 +412,14 @@ export function Editor({
                   {f.name}
                   <small>
                     {" "}
-                    · {Math.round(f.kcal * 10) / 10} kcal per 100 g
+                    ·{" "}
+                    {Math.round(
+                      catalogServing(f, source, catalogQuery).calories,
+                    )}{" "}
+                    kcal per{" "}
+                    {catalogServing(f, source, catalogQuery).unit === "g"
+                      ? "100 g"
+                      : catalogServing(f, source, catalogQuery).unit}
                     {f.updated && ` · energy updated ${f.updated}`}
                   </small>
                 </span>
@@ -431,13 +429,7 @@ export function Editor({
                   onClick={() =>
                     add({
                       name: f.name,
-                      calorie: {
-                        calories: f.kcal,
-                        basisQuantity: 100,
-                        quantity: 100,
-                        unit: "g",
-                        source: sourceText(source, f.id, f.updated),
-                      },
+                      calorie: catalogServing(f, source, catalogQuery),
                     })
                   }
                 >
@@ -448,20 +440,6 @@ export function Editor({
           </div>
         </section>
       ))}
-      <label>
-        Meal title <span className="muted">optional</span>
-        <input
-          value={draft.title || ""}
-          onChange={(e) => change({ ...draft, title: e.target.value })}
-        />
-      </label>
-      <label>
-        Notes <span className="muted">optional</span>
-        <textarea
-          value={draft.notes || ""}
-          onChange={(e) => change({ ...draft, notes: e.target.value })}
-        />
-      </label>
       <label className="check-label">
         <input
           type="checkbox"

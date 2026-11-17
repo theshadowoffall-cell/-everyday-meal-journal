@@ -29,3 +29,8 @@ Search now prioritizes the local Health Canada CNF 2026 dataset, with USDA resul
 ## Food search relevance release
 
 The release prioritizes direct food-name matches and common whole eggs over incidental matches in sandwiches and restaurant foods, while preserving explicit searches for prepared foods. Saved-food searches use the same ordering; no user records or food values are changed. Final build and static asset checks passed, together with 67 automated tests.
+
+
+## Serving and goal release
+
+The release adds closer food/portion matching, documented serving defaults, Progress-only calorie summaries and dated goals with user-selectable direction and calendar markers. Legacy meal title and notes values remain stored. Averages exclude incomplete and unlogged days. Final build, asset checks and 73 automated tests passed; native iPhone behavior remains unverified.

@@ -60,3 +60,8 @@ Added Canadian Nutrient File 2026 as the first local search source: 5,993 foods 
 ## Food search relevance update
 
 Ranked Canadian, USDA and saved-food searches by how closely the food name matches the query. Ordinary whole chicken eggs appear before egg sandwiches and restaurants; explicit restaurant searches remain available. Added cached search indexes with invalidation for edited saved-food names. Tested Canadian/USDA queries, French/aliases/plurals, restaurant queries and visible ordering in Library and the meal editor. TypeScript/Vite build, static asset checks and all 67 tests passed. iPhone performance and native-browser interaction remain unverified.
+
+
+## Serving-based search and calorie goals
+
+Improved prefix/name/portion relevance for app/apple, egg, pizza and pizza slice; default serving uses only documented portion weights, falling back to an explicit 100 g when none is suitable. Removed meal title/notes input controls while preserving legacy fields. Moved daily totals and last completed week/current month averages to Progress; averages use only recorded complete days. Added dated, user-selectable at-or-below/at-or-above goals and accessible calendar dots; unknown and unlogged days are not marked met or missed. Goal preferences are validated and backed up with existing versioned data. Final TypeScript/Vite build, static asset check and 73 automated tests passed. Native iPhone behavior remains unverified.

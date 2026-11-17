@@ -5,10 +5,12 @@ export function MealRows({
   meals,
   onClick,
   urls,
+  showCalories = true,
 }: {
   meals: Meal[];
   onClick: (m: Meal) => void;
   urls: Record<string, string>;
+  showCalories?: boolean;
 }) {
   return (
     <>
@@ -25,7 +27,7 @@ export function MealRows({
                     ? `${m.title} ${m.items.map((i) => i.name).join(" + ")}`
                     : m.items.map((i) => i.name).join(" + ")
                 }
-                aria-describedby={`calories-${m.id}`}
+                aria-describedby={showCalories ? `calories-${m.id}` : undefined}
                 key={m.id}
                 onClick={() => onClick(m)}
               >
@@ -37,12 +39,14 @@ export function MealRows({
                   <strong>
                     {m.title || m.items.map((i) => i.name).join(" + ")}
                   </strong>
-                  <small id={`calories-${m.id}`}>
-                    {(() => {
-                      const t = calorieTotal(m.items);
-                      return `${Math.round(t.known)} kcal${t.complete ? "" : " · incomplete"}`;
-                    })()}
-                  </small>
+                  {showCalories && (
+                    <small id={`calories-${m.id}`}>
+                      {(() => {
+                        const t = calorieTotal(m.items);
+                        return `${Math.round(t.known)} kcal${t.complete ? "" : " · incomplete"}`;
+                      })()}
+                    </small>
+                  )}
                   {(m.title || m.notes) && (
                     <small>
                       {m.title

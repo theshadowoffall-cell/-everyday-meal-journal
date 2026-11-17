@@ -863,3 +863,22 @@ body,
   border-color: #8a9a82;
   margin-bottom: 14px;
 }
+.goal-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #1d4d2d;
+  flex-shrink: 0;
+}
+.goal-dot.met {
+  background: #1d4d2d;
+}
+.goal-dot.unmet {
+  background: #faf8f3;
+  border-color: #a65030;
+}
+.calendar-day .goal-dot {
+  position: absolute;
+  bottom: 2px;
+}

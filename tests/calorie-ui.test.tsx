@@ -27,6 +27,7 @@ it("logs USDA egg using a documented large portion, displays calories, and survi
     fireEvent.change(screen.getByLabelText("Search common foods"), {
       target: { value: "Egg, whole, raw, fresh" },
     });
+    expect(screen.getByText(/72 kcal per large/)).toBeTruthy();
     fireEvent.click(
       screen.getByRole("button", { name: "Add USDA Egg, whole, raw, fresh" }),
     );
@@ -40,11 +41,15 @@ it("logs USDA egg using a documented large portion, displays calories, and survi
     expect(meal.items[0].calorie?.calories).toBe(71.5);
     expect(meal.items[0].calorie?.source).toContain("50 g per large");
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-    expect(screen.getByText("Calories: 72 kcal")).toBeTruthy();
+    expect(screen.queryByText("Calories: 72 kcal")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Progress" }));
+    expect(screen.getByText(/Today: 72 kcal/)).toBeTruthy();
     cleanup();
     render(<App database={db} />);
     await screen.findByRole("heading", { name: "Today" });
-    expect(screen.getByText("Calories: 72 kcal")).toBeTruthy();
+    expect(screen.queryByText("Calories: 72 kcal")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Progress" }));
+    expect(screen.getByText(/Today: 72 kcal/)).toBeTruthy();
   } finally {
     cleanup();
     await db.close();
@@ -64,6 +69,9 @@ it("retains the serving basis when a calorie value is temporarily cleared and re
     fireEvent.click(
       screen.getByRole("button", { name: "Add USDA Egg, whole, raw, fresh" }),
     );
+    fireEvent.change(screen.getByLabelText("USDA portion"), {
+      target: { value: "grams" },
+    });
     fireEvent.change(screen.getByLabelText("Calories per serving"), {
       target: { value: "" },
     });

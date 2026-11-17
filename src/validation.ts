@@ -253,6 +253,23 @@ export function validateData(d: any): asserts d is Data {
     ),
     "Pinned food is missing or archived.",
   );
+  assert(
+    p.calorieGoals === undefined ||
+      (Array.isArray(p.calorieGoals) &&
+        p.calorieGoals.length <= 4000 &&
+        p.calorieGoals.every(
+          (g: any) =>
+            obj(g) &&
+            validDate(g.from) &&
+            Number.isFinite(g.target) &&
+            g.target > 0 &&
+            g.target <= 100000 &&
+            ["at_or_below", "at_or_above"].includes(g.direction),
+        ) &&
+        new Set(p.calorieGoals.map((g: any) => g.from)).size ===
+          p.calorieGoals.length),
+    "Invalid calorie goals.",
+  );
   for (const k of ["voiceMode", "scanMode"])
     assert(
       p[k] === undefined || ["manual", "automatic"].includes(p[k]),

@@ -49,11 +49,15 @@ it("logs Canadian garlic naan by its documented piece, and retains a dated snaps
     const restored = await importJSON(await exportJSON(await db.read()));
     expect(restored.meals[0].items[0].calorie).toEqual(item.calorie);
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-    expect(screen.getByText("Calories: 289 kcal")).toBeTruthy();
+    expect(screen.queryByText("Calories: 289 kcal")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Progress" }));
+    expect(screen.getByText(/Today: 289 kcal/)).toBeTruthy();
     cleanup();
     render(<App database={db} />);
     await screen.findByRole("heading", { name: "Today" });
-    expect(screen.getByText("Calories: 289 kcal")).toBeTruthy();
+    expect(screen.queryByText("Calories: 289 kcal")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Progress" }));
+    expect(screen.getByText(/Today: 289 kcal/)).toBeTruthy();
   } finally {
     cleanup();
     await db.close();

@@ -60,3 +60,8 @@ Automated tests exercise word-order-independent garlic-naan search, the CNF 7912
 ## Search relevance update
 
 Search ranks exact food names and names beginning with the requested food above incidental matches in prepared combinations. Whole eggs are preferred over dried eggs and sandwiches for an ordinary egg search; an explicitly requested restaurant sandwich remains searchable. The same ranking is used for saved foods in Library and the meal editor. Tests cover Canadian and USDA egg results, explicit Burger King searches, garlic naan, French aliases, Froot Loops, plurals, result limits, and visible ordering of saved foods in both screens. Existing item names, calorie values and records are not modified.
+
+
+## Serving defaults and calorie goals
+
+The meal editor defaults to documented portions when available; 100 g remains the fallback when a documented serving is absent. Search ranks name-prefix and direct matches and supports portion words such as pizza slice. Titles and notes inputs were removed; legacy values remain stored and a UI edit test confirms preservation. Calorie day and average tests exclude unlogged days, incomplete days and future imports. Goal direction is user-selectable (at/below or at/above), stored as dated preferences, included in backups, and evaluated only for complete logged days. Automated UI exercises both directions, the Progress-only daily total, averages, markers and reload. Real iPhone and supported rendered-browser checks remain unverified.

@@ -55,3 +55,8 @@ Added independent, persistent Manual/Automatic switches. Automatic voice returns
 ## Canadian Nutrient File release
 
 Added Canadian Nutrient File 2026 as the first local search source: 5,993 foods and 21,206 unambiguous edible household portions; USDA remains available. Search supports word order, French descriptions and unspaced Frootloops. Added actual energy-update dates and package-label guidance. Government download returned HTTP 403 in the build environment; all 5,993 names/calories/source dates and type-6 portion IDs/weights were cross-checked against an independently built SQLite distribution. Government's 2026 structure guide was used to confirm per-100-g energy and gram conversion semantics. Licence attribution and pinned source hashes are recorded. TypeScript/Vite build, 58 tests, static asset checks and the full source cross-check passed. Existing stored entries are not migrated or rewritten. Native iPhone layout/storage behavior remains unverified.
+
+
+## Food search relevance update
+
+Ranked Canadian, USDA and saved-food searches by how closely the food name matches the query. Ordinary whole chicken eggs appear before egg sandwiches and restaurants; explicit restaurant searches remain available. Added cached search indexes with invalidation for edited saved-food names. Tested Canadian/USDA queries, French/aliases/plurals, restaurant queries and visible ordering in Library and the meal editor. TypeScript/Vite build, static asset checks and all 67 tests passed. iPhone performance and native-browser interaction remain unverified.

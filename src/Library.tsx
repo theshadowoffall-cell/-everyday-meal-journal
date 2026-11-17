@@ -1,3 +1,4 @@
+import { searchFoods } from "./catalog";
 import { useState } from "react";
 import type { Data, Food } from "./types";
 import { Empty, Icon, Photo } from "./ui";
@@ -18,12 +19,7 @@ export function Library({
   const [archived, setArchived] = useState(false);
   const p = data.preferences[0].pins;
   const foods = data.foods.filter((f) => (archived ? f.archived : !f.archived));
-  const results = foods.filter((f) =>
-    [f.name, ...(f.aliases || [])]
-      .join(" ")
-      .toLowerCase()
-      .includes(query.toLowerCase()),
-  );
+  const results = searchFoods(foods, query);
   const recentIds = [
     ...new Set(
       [...data.meals]

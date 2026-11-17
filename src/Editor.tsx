@@ -1,4 +1,9 @@
-import { searchCatalog, identifyFood, sourceText } from "./catalog";
+import {
+  searchCatalog,
+  searchFoods,
+  identifyFood,
+  sourceText,
+} from "./catalog";
 import { snapshot } from "./types";
 import { itemCalories, calorieTotal } from "./calories";
 import { useState } from "react";
@@ -360,31 +365,25 @@ export function Editor({
         />
       </label>
       <div className="picker">
-        {data.foods
-          .filter(
-            (f) =>
-              !f.archived &&
-              [f.name, ...(f.aliases || [])]
-                .join(" ")
-                .toLowerCase()
-                .includes(query.toLowerCase()),
-          )
-          .map((f) => (
-            <div className="picker-row" key={f.id}>
-              <button className="grow" onClick={() => details(f)}>
-                {f.name}
-              </button>
-              <button
-                className="square"
-                aria-label={`Add ${f.name}`}
-                onClick={() => {
-                  add(snapshot(f));
-                }}
-              >
-                <Icon name="plus" />
-              </button>
-            </div>
-          ))}
+        {searchFoods(
+          data.foods.filter((f) => !f.archived),
+          query,
+        ).map((f) => (
+          <div className="picker-row" key={f.id}>
+            <button className="grow" onClick={() => details(f)}>
+              {f.name}
+            </button>
+            <button
+              className="square"
+              aria-label={`Add ${f.name}`}
+              onClick={() => {
+                add(snapshot(f));
+              }}
+            >
+              <Icon name="plus" />
+            </button>
+          </div>
+        ))}
       </div>
       <label>
         Search common foods

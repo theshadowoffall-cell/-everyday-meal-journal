@@ -24,3 +24,8 @@ The current release candidate adds independent saved Manual/Automatic settings f
 ## Canadian Nutrient File release candidate
 
 Search now prioritizes the local Health Canada CNF 2026 dataset, with USDA results below. The source is attributed under the Open Government Licence – Canada. Database integrity and 2026 measure semantics were cross-checked as described in VALIDATION.md; the direct government download was blocked in the build environment, so a pinned mirror and independent second distribution were used. Full build and asset checks passed, as did 58 automated tests. Real iPhone behavior remains unverified.
+
+
+## Food search relevance release
+
+The release prioritizes direct food-name matches and common whole eggs over incidental matches in sandwiches and restaurant foods, while preserving explicit searches for prepared foods. Saved-food searches use the same ordering; no user records or food values are changed. Final build and static asset checks passed, together with 67 automated tests.

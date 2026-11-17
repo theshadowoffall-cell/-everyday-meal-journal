@@ -3,14 +3,18 @@ import type { CalorieValue } from "./calories";
 /** Read only an unambiguous calorie value and an explicitly stated serving.
  * OCR results are unreviewed and are never inferred from nutrient amounts. */
 export function extractLabelCalories(text: string): CalorieValue | undefined {
-  const values = [
-    ...text.matchAll(/\bcalories\s*[:\-]?\s*(\d+(?:[.,]\d+)?)(?![\d.,])/gi),
-  ];
-  if (values.length !== 1) return undefined;
-  const calories = Number(values[0][1].replace(",", "."));
+  const lines = text.split(/\r?\n/).map((line) => line.trim());
+  const calorieLines = lines.filter((line) => /\bcalories\b/i.test(line));
+  if (calorieLines.length !== 1) return undefined;
+  // Reject multiple columns, units such as kJ, negative values, and ambiguous
+  // thousands separators instead of interpreting OCR text as certain calories.
+  const value = calorieLines[0].match(
+    /^calories\s*:?\s*(\d+(?:[.,]\d{1,2})?)\s*(?:kcal)?\s*$/i,
+  );
+  if (!value) return undefined;
+  const calories = Number(value[1].replace(",", "."));
   if (!Number.isFinite(calories) || calories < 0 || calories > 1000000)
     return undefined;
-  const lines = text.split(/\r?\n/).map((line) => line.trim());
   const servingLines = lines.filter((line) =>
     /^(?:per|serving size|portion)\s*[:\-]?\s*\S/i.test(line),
   );

@@ -386,9 +386,9 @@ export function Editor({
         />
       </label>
       <p className="muted">
-        Canadian Nutrient File 2026 first, followed by USDA foods. Values are
-        per 100 g; preparation matters. Packaged foods can change, so use your
-        package label when available. Search stays on this device.
+        Canadian and USDA foods are searched on this device. Portions use
+        documented serving sizes when available; otherwise values are per 100 g.
+        Packaged foods can change, so use your package label when available.
       </p>
       <p className="muted">
         Canadian Nutrient File 2026, Health Canada. Contains information
@@ -402,44 +402,42 @@ export function Editor({
         </a>
         .
       </p>
-      {(["canada", "usda"] as const).map((source) => (
-        <section key={source}>
-          <h3>{source === "canada" ? "Canadian foods" : "USDA foods"}</h3>
-          <div className="picker">
-            {searchCatalog(source, catalogQuery).map((f) => (
-              <div className="picker-row" key={`${source}-${f.id}`}>
-                <span className="grow">
-                  {f.name}
-                  <small>
-                    {" "}
-                    ·{" "}
-                    {Math.round(
-                      catalogServing(f, source, catalogQuery).calories,
-                    )}{" "}
-                    kcal per{" "}
-                    {catalogServing(f, source, catalogQuery).unit === "g"
-                      ? "100 g"
-                      : catalogServing(f, source, catalogQuery).unit}
-                    {f.updated && ` · energy updated ${f.updated}`}
-                  </small>
-                </span>
-                <button
-                  className="square"
-                  aria-label={`Add ${source === "canada" ? "Canadian" : "USDA"} ${f.name}`}
-                  onClick={() =>
-                    add({
-                      name: f.name,
-                      calorie: catalogServing(f, source, catalogQuery),
-                    })
-                  }
-                >
-                  <Icon name="plus" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
+      {(["canada", "usda"] as const).map((source) => {
+        const results = searchCatalog(source, catalogQuery);
+        return (
+          <section key={source}>
+            <h3>{source === "canada" ? "Canadian foods" : "USDA foods"}</h3>
+            {catalogQuery.trim().length >= 2 && results.length === 0 && (
+              <p className="muted">No matching foods.</p>
+            )}
+            <div className="picker">
+              {results.map((f) => {
+                const serving = catalogServing(f, source, catalogQuery);
+                return (
+                  <div className="picker-row" key={`${source}-${f.id}`}>
+                    <span className="grow">
+                      {f.name}
+                      <small>
+                        {" · "}
+                        {Math.round(serving.calories)} kcal per{" "}
+                        {serving.unit === "g" ? "100 g" : serving.unit}
+                        {f.updated && ` · energy updated ${f.updated}`}
+                      </small>
+                    </span>
+                    <button
+                      className="square"
+                      aria-label={`Add ${source === "canada" ? "Canadian" : "USDA"} ${f.name}`}
+                      onClick={() => add({ name: f.name, calorie: serving })}
+                    >
+                      <Icon name="plus" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
       <label className="check-label">
         <input
           type="checkbox"

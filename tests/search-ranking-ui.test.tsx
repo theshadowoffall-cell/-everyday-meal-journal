@@ -58,3 +58,21 @@ it("ranks plain saved eggs before a sandwich in both Library and the meal editor
     await db.close();
   }
 });
+it("explains when neither local database finds a food", async () => {
+  freeze();
+  const db = new JournalDB("search-empty-" + crypto.randomUUID(), () => {});
+  try {
+    render(<App database={db} />);
+    await screen.findByRole("heading", { name: "Today" });
+    fireEvent.click(screen.getByRole("button", { name: "Add meal" }));
+    await screen.findByRole("dialog");
+    fireEvent.change(screen.getByLabelText("Search common foods"), {
+      target: { value: "zzzxqnotfood" },
+    });
+    expect(screen.getAllByText("No matching foods.")).toHaveLength(2);
+    expect((await db.read()).meals).toHaveLength(0);
+  } finally {
+    cleanup();
+    await db.close();
+  }
+});

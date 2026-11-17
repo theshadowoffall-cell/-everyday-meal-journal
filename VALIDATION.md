@@ -65,3 +65,8 @@ Search ranks exact food names and names beginning with the requested food above 
 ## Serving defaults and calorie goals
 
 The meal editor defaults to documented portions when available; 100 g remains the fallback when a documented serving is absent. Search ranks name-prefix and direct matches and supports portion words such as pizza slice. Titles and notes inputs were removed; legacy values remain stored and a UI edit test confirms preservation. Calorie day and average tests exclude unlogged days, incomplete days and future imports. Goal direction is user-selectable (at/below or at/above), stored as dated preferences, included in backups, and evaluated only for complete logged days. Automated UI exercises both directions, the Progress-only daily total, averages, markers and reload. Real iPhone and supported rendered-browser checks remain unverified.
+
+
+## Scanner, voice and food-search stress checks
+
+Hardened automatic calorie extraction to reject ambiguous multi-column values, kJ, negative numbers and ambiguous separators. Late speech results after an end event and malformed alternatives are ignored. Search explains empty results and documented serving defaults. Preserved existing food databases, records and aliases. Production build and asset checks passed; 80 automated tests passed with simulated browser speech, scan callbacks, cancellations, failed writes and database-backed drafts. Real Tesseract CPU OCR read a synthetic clear calorie label, rejected a two-column label and left a missing calorie value unknown. These are synthetic images and jsdom/fake IndexedDB checks, not real phone, microphone, camera or native browser tests. Packaged barcode lookup is not integrated.

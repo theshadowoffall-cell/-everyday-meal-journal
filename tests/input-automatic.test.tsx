@@ -68,8 +68,8 @@ it("automatically adds one unambiguous saved food and ignores duplicate or late 
   fireEvent.click(screen.getByRole("button", { name: "Start browser speech" }));
   const callback = recognition.onresult;
   act(() => {
-    callback({ results: [[{ transcript: "Chicken and rice" }]] });
-    callback({ results: [[{ transcript: "Chicken and rice" }]] });
+    for (let i = 0; i < 100; i++)
+      callback({ results: [[{ transcript: "Chicken and rice" }]] });
   });
   expect(use).toHaveBeenCalledTimes(1);
   expect(use.mock.calls[0][0]).toMatchObject({
@@ -293,6 +293,125 @@ it("remembers separate voice and scan mode choices on the device", async () => {
     expect(
       screen.getByRole("button", { name: /Input mode: automatic/ }),
     ).toBeTruthy();
+  } finally {
+    cleanup();
+    await db.close();
+  }
+});
+it("ignores a result delivered after speech has ended", () => {
+  let recognition: any;
+  class FakeSpeech {
+    onresult: any;
+    onerror: any;
+    onend: any;
+    abort = vi.fn();
+    start = vi.fn();
+    constructor() {
+      recognition = this;
+    }
+  }
+  Object.assign(window, { SpeechRecognition: FakeSpeech });
+  const use = vi.fn();
+  render(
+    <Voice
+      foods={fixture().foods}
+      consent={true}
+      acceptConsent={async () => {}}
+      close={() => {}}
+      use={use}
+      initialMode="automatic"
+    />,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Start browser speech" }));
+  act(() => {
+    recognition.onend();
+    recognition.onresult({ results: [[{ transcript: "Chicken and rice" }]] });
+  });
+  expect(use).not.toHaveBeenCalled();
+});
+it("does not use a malformed speech result and accepts a later valid result", () => {
+  let recognition: any;
+  class FakeSpeech {
+    onresult: any;
+    onerror: any;
+    onend: any;
+    abort = vi.fn();
+    start = vi.fn();
+    constructor() {
+      recognition = this;
+    }
+  }
+  Object.assign(window, { SpeechRecognition: FakeSpeech });
+  const use = vi.fn();
+  render(
+    <Voice
+      foods={fixture().foods}
+      consent={true}
+      acceptConsent={async () => {}}
+      close={() => {}}
+      use={use}
+      initialMode="automatic"
+    />,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Start browser speech" }));
+  act(() => recognition.onresult({ results: [null, [], [{}]] }));
+  expect(use).not.toHaveBeenCalled();
+  act(() =>
+    recognition.onresult({ results: [[{ transcript: "Chicken and rice" }]] }),
+  );
+  expect(use).toHaveBeenCalledTimes(1);
+});
+it("ignores an old scan when another photo replaces it", async () => {
+  const autoUse = vi.fn(async () => {});
+  render(
+    <Scan
+      foods={[]}
+      close={() => {}}
+      save={async (f) => f}
+      add={() => {}}
+      autoUse={autoUse}
+      initialMode="automatic"
+    />,
+  );
+  const input = screen.getByLabelText("Camera or photo");
+  fireEvent.change(input, {
+    target: { files: [new File(["a"], "a.jpg", { type: "image/jpeg" })] },
+  });
+  await waitFor(() => expect(finish).toBeTypeOf("function"));
+  const oldResult = finish;
+  fireEvent.change(input, {
+    target: { files: [new File(["b"], "b.jpg", { type: "image/jpeg" })] },
+  });
+  await waitFor(() => expect(finish).not.toBe(oldResult));
+  await act(async () => oldResult("Per 100 g\nCalories 999"));
+  expect(autoUse).not.toHaveBeenCalled();
+  await act(async () => finish("Per 100 g\nCalories 150"));
+  expect(autoUse).toHaveBeenCalledTimes(1);
+  expect(autoUse.mock.calls[0][0].calorie.calories).toBe(150);
+});
+it("stores an ambiguous scan as unknown calories, not a guessed value", async () => {
+  freeze();
+  const db = new JournalDB("scan-ambiguous-" + crypto.randomUUID(), () => {});
+  try {
+    render(<App database={db} />);
+    await screen.findByRole("heading", { name: "Today" });
+    fireEvent.click(screen.getByRole("button", { name: "Add meal" }));
+    await screen.findByRole("dialog");
+    fireEvent.click(screen.getByRole("button", { name: "Scan label" }));
+    mode();
+    fireEvent.change(screen.getByLabelText("Camera or photo"), {
+      target: { files: [new File(["x"], "label.jpg", { type: "image/jpeg" })] },
+    });
+    await waitFor(() => expect(finish).toBeTypeOf("function"));
+    await act(async () => finish("Per 100 g\nCalories 150 300"));
+    await screen.findByRole("dialog", { name: "Add meal" });
+    await waitFor(async () =>
+      expect((await db.read()).drafts[0].items).toHaveLength(1),
+    );
+    expect((await db.read()).drafts[0].items[0].calorie).toBeUndefined();
+    expect((await db.read()).drafts[0].items[0].label?.text).toContain(
+      "150 300",
+    );
   } finally {
     cleanup();
     await db.close();

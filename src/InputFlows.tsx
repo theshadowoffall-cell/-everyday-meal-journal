@@ -69,10 +69,12 @@ export function Voice({
       r.interimResults = false;
       r.onresult = (e) => {
         if (!operation.current.current(id)) return;
-        const result = Array.from(e.results as any[])
-          .map((r: any) => r[0].transcript)
+        const result = Array.from((e?.results ?? []) as any[])
+          .map((r: any) => r?.[0]?.transcript)
+          .filter((part): part is string => typeof part === "string")
           .join(" ")
           .trim();
+        if (!result) return;
         setText(result);
         setSelected("");
         if (result && modeRef.current === "automatic") {
@@ -101,6 +103,8 @@ export function Voice({
       };
       r.onend = () => {
         if (operation.current.current(id)) {
+          operation.current.cancel();
+          recognition.current = undefined;
           setListening(false);
           setStatus("Listening ended. Review your text before using it.");
         }

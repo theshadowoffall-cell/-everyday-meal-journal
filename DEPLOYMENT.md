@@ -39,3 +39,8 @@ The release adds closer food/portion matching, documented serving defaults, Prog
 ## Simpler food and calorie display
 
 The release simplifies saved-food editing, makes all active favourites available for quick adding, and lets Settings choose one calorie summary in Progress. Stored legacy details remain intact; the Aliases control remains until the user confirms its removal. Production build, static asset checks and 75 automated tests passed. Real iPhone zoom and layout remain unverified.
+
+
+## Scanner, voice and food-search stress checks
+
+Hardened automatic calorie extraction to reject ambiguous multi-column values, kJ, negative numbers and ambiguous separators. Late speech results after an end event and malformed alternatives are ignored. Search explains empty results and documented serving defaults. Preserved existing food databases, records and aliases. Production build and asset checks passed; 80 automated tests passed with simulated browser speech, scan callbacks, cancellations, failed writes and database-backed drafts. Real Tesseract CPU OCR read a synthetic clear calorie label, rejected a two-column label and left a missing calorie value unknown. These are synthetic images and jsdom/fake IndexedDB checks, not real phone, microphone, camera or native browser tests. Packaged barcode lookup is not integrated.

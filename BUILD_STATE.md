@@ -70,3 +70,8 @@ Improved prefix/name/portion relevance for app/apple, egg, pizza and pizza slice
 ## Simpler food and calorie display
 
 Removed Type and Notes controls from saved-food editing while retaining stored values. The Aliases control remains pending the user’s explicit continuation. All active favourites can be quick-added on Today; meal and favourite calories appear beside names. Settings chooses the daily, last-week or current-month calorie summary in Progress; the preference is validated and backed up. Unknown meal calories are labelled unknown. Existing zoom restrictions remain in place. Production build and static asset check passed; all 75 automated tests passed, including unpinned favourite saving, old food metadata preservation and preference backup validation. Real iPhone zoom and layout remain unverified.
+
+
+## Scanner, voice and food-search stress checks
+
+Hardened automatic calorie extraction to reject ambiguous multi-column values, kJ, negative numbers and ambiguous separators. Late speech results after an end event and malformed alternatives are ignored. Search explains empty results and documented serving defaults. Preserved existing food databases, records and aliases. Production build and asset checks passed; 80 automated tests passed with simulated browser speech, scan callbacks, cancellations, failed writes and database-backed drafts. Real Tesseract CPU OCR read a synthetic clear calorie label, rejected a two-column label and left a missing calorie value unknown. These are synthetic images and jsdom/fake IndexedDB checks, not real phone, microphone, camera or native browser tests. Packaged barcode lookup is not integrated.

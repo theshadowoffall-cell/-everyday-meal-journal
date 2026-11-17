@@ -27,6 +27,11 @@ describe("automatic label calories", () => {
       "Per 100 g\nProtein 12 g",
       "Per 0 g\nCalories 150",
       "Per 100 g\nCalories l5O",
+      "Per 100 g\nCalories 150 300",
+      "Per 100 g\nCalories 150 kJ",
+      "Per 100 g\nCalories -150",
+      "Per 100 g\nCalories 1,500",
+      "Per 100 g\nCalories 150 %",
     ])
       expect(extractLabelCalories(text)).toBeUndefined();
   });

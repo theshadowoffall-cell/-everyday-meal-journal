@@ -85,3 +85,8 @@ Settings shows the currently running build identifier and build date in the devi
 ## New app icon
 
 Updated the home-screen, manifest and browser icons to a cream bowl and checkmark on forest green. New filenames help avoid stale icon caches; older icon files remain for older cached pages. Production build, asset checks and 80 automated tests passed. The icon was not verified on a physical iPhone; iOS may retain an older installed icon until the shortcut is added again.
+
+
+## Bowl-only icon
+
+Removed the checkmark from the home-screen and browser icon. New icon filenames reduce cache conflicts. Production build and manifest/asset checks passed; the icon was not tested on a physical iPhone.

@@ -80,3 +80,8 @@ Hardened automatic calorie extraction to reject ambiguous multi-column values, k
 ## Build version in Settings
 
 Settings shows the currently running build identifier and build date in the device’s local timezone. Both are generated automatically at build time, not stored with personal records. The date indicates build time, not the exact Pages publication time. The production build, static asset checks and 80 automated tests passed. Installed iPhone caching and reopening behavior remain unverified on a real device.
+
+
+## New app icon
+
+Updated the home-screen, manifest and browser icons to a cream bowl and checkmark on forest green. New filenames help avoid stale icon caches; older icon files remain for older cached pages. Production build, asset checks and 80 automated tests passed. The icon was not verified on a physical iPhone; iOS may retain an older installed icon until the shortcut is added again.

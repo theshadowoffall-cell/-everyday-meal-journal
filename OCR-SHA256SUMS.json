@@ -1,0 +1,13 @@
+{
+  "eng.traineddata.gz": "ed350f3752f81ee8f38769edc14d92d997dababe23b565c59879372cc46a2468",
+  "fra.traineddata.gz": "1c0916fac2dbd6f121ca8a57a92f08e4a119227602c7c984da986222eab6cd3b",
+  "tesseract-core-lstm.wasm": "220e2e87551edccb85519796a170469f8ab2a8055216789e3b8b1ada18b7bc2b",
+  "tesseract-core-lstm.wasm.js": "775a35df6f2ae100e02609443e6bd5cafcd07983dd6175454ca4a432a7730687",
+  "tesseract-core-simd-lstm.wasm": "187d76742dfc0d8929f0b49a619f145bb6370730776c7bd0d3e20c6b2098808d",
+  "tesseract-core-simd-lstm.wasm.js": "9d7c43fb206dc9f48475228b46bf35f888fa9e6259da2e67d5a75c77049f2dc7",
+  "tesseract-core-simd.wasm": "ca11ee92a02023e4f5083eefd0966fb83b297416da54e997b9f6ce445f719c9b",
+  "tesseract-core-simd.wasm.js": "3b0678c47a8dea6abb931b214171c08b742a5b9a9fcbbb1a028a08d5de6e9d4c",
+  "tesseract-core.wasm": "740f7e466a2f026e1f1e54a2e0d9957e386d8166110d1290224abd3d08986106",
+  "tesseract-core.wasm.js": "e66872f6a76f5ad414d73d21512245df0de3060ad4871a97c47efceaab27b955",
+  "worker.min.js": "38645599043239c0eb6db08a6504a92dcdc292200535f3e9339cd77c4443b842"
+}

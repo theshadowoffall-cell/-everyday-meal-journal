@@ -13,3 +13,8 @@ Blocked/unverified: no owner-controlled free-host account credentials, so no ext
 Final integrated run completed: 29 tests passed (14 core, 11 UI, 4 additional), TypeScript/Vite build passed, portable-asset/manifest/no-fixtures check passed, real CPU OCR passed. Added per-record mutation tokens so undo refuses even delete/recreate cycles; pending category/date defaults and schema validation centralised. No application changes after the final passing run.
 
 GitHub deployment attempted: authenticated account available, but POST /user/repos returned 403 Resource not accessible by integration. No repository created. Exact owner-run GitHub Pages steps and limits documented in README. Final deliverable output path /codex/... cannot be created (read-only filesystem); packaging retained under /workspace/work/delivery. Browser/device and screenshot verification remain explicitly pending. See VALIDATION.md for evidence and residual differences.
+
+
+## Repository handoff
+
+Owner supplied https://github.com/theshadowoffall-cell/-everyday-meal-journal . Verified empty/public repository and push access, then uploaded the existing source and production build (main branch, /docs). No application code changed or redundant test rerun performed. Enabling GitHub Pages through API returned 403 Resource not accessible by integration. Owner must select main /docs in Settings → Pages. See DEPLOYMENT.md.

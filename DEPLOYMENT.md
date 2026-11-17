@@ -19,3 +19,8 @@ Viewport scaling, pinch and double-tap gestures are restricted at the user’s r
 ## Automatic input release
 
 The current release candidate adds independent saved Manual/Automatic settings for voice and scan, conservative unreviewed calorie extraction, and historical label viewing. It also includes the previously prepared calorie upgrade. GitHub Pages publishes from main /docs. Final regression: 51 tests, production build and asset checks passed; iPhone-specific functionality is unverified.
+
+
+## Canadian Nutrient File release candidate
+
+Search now prioritizes the local Health Canada CNF 2026 dataset, with USDA results below. The source is attributed under the Open Government Licence – Canada. Database integrity and 2026 measure semantics were cross-checked as described in VALIDATION.md; the direct government download was blocked in the build environment, so a pinned mirror and independent second distribution were used. Full build and asset checks passed, as did 58 automated tests. Real iPhone behavior remains unverified.

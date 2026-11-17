@@ -49,3 +49,10 @@ The 7,793-item USDA SR Legacy catalogue is bundled locally, attributed and based
 ## Automatic voice and scan update
 
 Automated component tests cover separate remembered voice/scan modes; exact, ambiguous and delayed voice callbacks; cancellation while microphone permission setup is pending; automatic OCR photo and unreviewed-label persistence in a draft; late scan cancellation; switching back to manual during scanning; and storage failure retaining the scanned text. Parser tests cover explicit metric and household portions and reject missing/ambiguous calories. Those tests use jsdom, fake IndexedDB and explicitly mocked browser recognition/OCR outcomes. The bundled Tesseract engine is also checked with a synthetic label on Node CPU. Native microphone recognition, Safari/Home Screen OCR, camera, keyboard, and device screenshot behavior remain unverified.
+
+
+## Canadian catalogue update
+
+The Canadian Nutrient File 2026 is searched first, with USDA results separately available. The local generator imports 5,993 foods and 21,206 unambiguous, documented edible portions; it filters refuse and yield and treats measure weights as full grams (not the old 2015 conversion factor). All source names, kcal values, source dates, and measure-type-6 keys/weights were checked against a separately built CNF 2026 SQLite distribution; two source names differed only in trailing whitespace. Exact input hashes and mirror provenance are in `src/data/canada-provenance.json`. Official direct CSV/ZIP downloads returned HTTP 403 in this environment.
+
+Automated tests exercise word-order-independent garlic-naan search, the CNF 7912 value 288.462120365 kcal/100 g and 1-piece weight 100.0667763 g, documented 250 ml applesauce and 1-medium-apple weights from Health Canada's structure guide, rejection of refuse measures, old USDA source resolution, French search, Froot Loops source age, package-label guidance, and Canadian meal persistence/reload/backup. Native iPhone and supported rendered-browser checks remain unverified.

@@ -50,3 +50,8 @@ Implemented locally: USDA SR Legacy catalogue (7,793 foods, documented whole-por
 ## Automatic voice and scan release
 
 Added independent, persistent Manual/Automatic switches. Automatic voice returns one exact saved match or unambiguous plain transcript to the draft; automatic scan captures a local photo and unreviewed text, extracts calories only with one explicit calorie value and serving, and returns to the draft. Meal saving remains explicit. Cancellation, mode changes, duplicate callbacks, delayed permissions, failures and v2 backup persistence were exercised. Full regression: 51 tests passed, production build and static asset checks passed; real CPU OCR synthetic label passed. Native iPhone speech/camera/OCR and screenshot checks remain unverified. Release candidate includes the prior calorie upgrade.
+
+
+## Canadian Nutrient File release
+
+Added Canadian Nutrient File 2026 as the first local search source: 5,993 foods and 21,206 unambiguous edible household portions; USDA remains available. Search supports word order, French descriptions and unspaced Frootloops. Added actual energy-update dates and package-label guidance. Government download returned HTTP 403 in the build environment; all 5,993 names/calories/source dates and type-6 portion IDs/weights were cross-checked against an independently built SQLite distribution. Government's 2026 structure guide was used to confirm per-100-g energy and gram conversion semantics. Licence attribution and pinned source hashes are recorded. TypeScript/Vite build, 58 tests, static asset checks and the full source cross-check passed. Existing stored entries are not migrated or rewritten. Native iPhone layout/storage behavior remains unverified.

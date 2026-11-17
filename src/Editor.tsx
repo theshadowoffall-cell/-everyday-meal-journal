@@ -1,4 +1,4 @@
-import catalog from "./data/usda.json";
+import { searchCatalog, identifyFood, sourceText } from "./catalog";
 import { snapshot } from "./types";
 import { itemCalories, calorieTotal } from "./calories";
 import { useState } from "react";
@@ -235,14 +235,17 @@ export function Editor({
                 Clear calorie information
               </button>
               {(() => {
-                const match = item.calorie?.source.match(
-                  /USDA FoodData Central SR Legacy, FDC (\d+)/,
-                );
-                const food =
-                  match && catalog.find((f) => f.id === Number(match[1]));
+                const identified =
+                  item.calorie && identifyFood(item.calorie.source);
+                const food = identified?.food;
+                const database = identified?.source;
+                const citation =
+                  food && database
+                    ? sourceText(database, food.id, food.updated)
+                    : "";
                 return food?.portions?.length ? (
                   <label>
-                    USDA portion
+                    {database === "canada" ? "Canadian" : "USDA"} portion
                     <select
                       value={
                         item.calorie?.unit === "g"
@@ -260,14 +263,14 @@ export function Editor({
                               basisQuantity: 1,
                               quantity: 1,
                               unit: portion.label,
-                              source: `USDA FoodData Central SR Legacy, FDC ${food.id}; ${portion.grams} g per ${portion.label}`,
+                              source: `${citation}; ${portion.grams} g per ${portion.label}`,
                             }
                           : {
                               calories: food.kcal,
                               basisQuantity: 100,
                               quantity: 100,
                               unit: "g",
-                              source: `USDA FoodData Central SR Legacy, FDC ${food.id}`,
+                              source: citation,
                             };
                         change({
                           ...draft,
@@ -387,31 +390,45 @@ export function Editor({
         Search common foods
         <input
           type="search"
-          placeholder="Search USDA foods"
+          placeholder="Search Canadian and USDA foods"
           value={catalogQuery}
           onChange={(e) => setCatalogQuery(e.target.value)}
         />
       </label>
       <p className="muted">
-        USDA FoodData Central, SR Legacy. Values are per 100 g; results depend
-        on preparation. Search is on this device.
+        Canadian Nutrient File 2026 first, followed by USDA foods. Values are
+        per 100 g; preparation matters. Packaged foods can change, so use your
+        package label when available. Search stays on this device.
       </p>
-      <div className="picker">
-        {catalogQuery.trim().length >= 2 &&
-          catalog
-            .filter((f) =>
-              f.name.toLowerCase().includes(catalogQuery.toLowerCase()),
-            )
-            .slice(0, 30)
-            .map((f) => (
-              <div className="picker-row" key={f.id}>
+      <p className="muted">
+        Canadian Nutrient File 2026, Health Canada. Contains information
+        licensed under the{" "}
+        <a
+          href="https://open.canada.ca/en/open-government-licence-canada"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Open Government Licence – Canada
+        </a>
+        .
+      </p>
+      {(["canada", "usda"] as const).map((source) => (
+        <section key={source}>
+          <h3>{source === "canada" ? "Canadian foods" : "USDA foods"}</h3>
+          <div className="picker">
+            {searchCatalog(source, catalogQuery).map((f) => (
+              <div className="picker-row" key={`${source}-${f.id}`}>
                 <span className="grow">
                   {f.name}
-                  <small> · {f.kcal} kcal per 100 g</small>
+                  <small>
+                    {" "}
+                    · {Math.round(f.kcal * 10) / 10} kcal per 100 g
+                    {f.updated && ` · energy updated ${f.updated}`}
+                  </small>
                 </span>
                 <button
                   className="square"
-                  aria-label={`Add USDA ${f.name}`}
+                  aria-label={`Add ${source === "canada" ? "Canadian" : "USDA"} ${f.name}`}
                   onClick={() =>
                     add({
                       name: f.name,
@@ -420,7 +437,7 @@ export function Editor({
                         basisQuantity: 100,
                         quantity: 100,
                         unit: "g",
-                        source: `USDA FoodData Central SR Legacy, FDC ${f.id}`,
+                        source: sourceText(source, f.id, f.updated),
                       },
                     })
                   }
@@ -429,7 +446,9 @@ export function Editor({
                 </button>
               </div>
             ))}
-      </div>
+          </div>
+        </section>
+      ))}
       <label>
         Meal title <span className="muted">optional</span>
         <input

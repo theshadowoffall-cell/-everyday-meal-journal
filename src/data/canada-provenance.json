@@ -1,0 +1,19 @@
+{
+  "dataset": "Canadian Nutrient File 2026",
+  "official_catalog": "https://open.canada.ca/data/en/dataset/1b6139bd-ed7e-4043-bc28-ff00e10f3109",
+  "license": "Open Government Licence – Canada",
+  "original_download_block": "HTTP 403 from this environment",
+  "csv_mirror": "https://github.com/greywhitebinary/blenderized-tubefeed-calculator/tree/6bbe035f99dae6c4bd6308033d9d1123d184c16c/cnf_fcen_all-files-data_2026",
+  "independent_crosscheck": "https://github.com/Aryan-Jhaveri/mcp-foodguidecanada/releases/tag/data-latest",
+  "independent_sqlite_gz_sha256": "6ecbf5c003dd45bb0fd21c0b29c74369e566f7593cf18279e7116897f3da748b",
+  "source_csv_sha256": {
+    "Food_Name.csv": "ee75a3208e8b79ee523ec5adffcf149f3f21806ac5d9942a9449077efe414c6c",
+    "Nutrient_Name.csv": "708a942fc8a6a4913b106cd964f4f3b116845ec72942a936477241be8889f785",
+    "Nutrient_Amount.csv": "c53803c72faadbdec9750ccaa1fc9a9cfd8732e0c784d2a66c62cd27d09b22d2",
+    "Measure_Name.csv": "429cf2e8d4bbd2b732a6e9acf35427ce6d3b4e9447aabaf86b427c48833b112f",
+    "Measure_Type.csv": "ce6ecd0f370820d6800d7b7b88ae5710691b5d7b358c0503273d36a1a878f977",
+    "Measure_Weight_Conversion.csv": "9d41fac4ba1471fddd25ea7e51a8352aec66de4f3c88802b0a2e02a85ebc3e6f"
+  },
+  "foods": 5993,
+  "portions": 21206
+}

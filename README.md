@@ -27,6 +27,8 @@ Deployment target: https://theshadowoffall-cell.github.io/-everyday-meal-journal
 
 This repository contains source at its root and the production site in `docs/`. Pages must publish from **main /docs** using branch-based publishing. No GitHub Actions or paid runtime is required.
 
+The Settings screen shows the running build version and build date in the device’s local time. Each production build generates these automatically; the date is the build time, not proof of the time it reached GitHub Pages. An open app may need to be closed and reopened to load a newer release.
+
 To update the site, run `npm ci`, the relevant tests, and `npm run build`; replace `docs/` with the contents of `dist/` (including `.nojekyll`), then commit and push. Keep the repository name and published origin stable. Never commit personal backups or browser profiles. Browser storage is shared by origin: use one instance of this journal per GitHub Pages hostname.
 
 Provider limits checked against GitHub's primary documentation during this build: public repositories support Pages on GitHub Free; recommended source repository limit 1 GB; published site maximum 1 GB; soft bandwidth limit 100 GB/month; soft limit 10 builds/hour. This site's static files are about 46 MiB, and the largest asset is about 11 MiB. Limits and terms can change. This is personal journal software, not an e-commerce service. See https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits . Recheck those limits when you deploy. Free hosting is not a promise of permanent availability.

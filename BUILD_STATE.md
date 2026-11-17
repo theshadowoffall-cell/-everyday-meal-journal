@@ -75,3 +75,8 @@ Removed Type and Notes controls from saved-food editing while retaining stored v
 ## Scanner, voice and food-search stress checks
 
 Hardened automatic calorie extraction to reject ambiguous multi-column values, kJ, negative numbers and ambiguous separators. Late speech results after an end event and malformed alternatives are ignored. Search explains empty results and documented serving defaults. Preserved existing food databases, records and aliases. Production build and asset checks passed; 80 automated tests passed with simulated browser speech, scan callbacks, cancellations, failed writes and database-backed drafts. Real Tesseract CPU OCR read a synthetic clear calorie label, rejected a two-column label and left a missing calorie value unknown. These are synthetic images and jsdom/fake IndexedDB checks, not real phone, microphone, camera or native browser tests. Packaged barcode lookup is not integrated.
+
+
+## Build version in Settings
+
+Settings shows the currently running build identifier and build date in the device’s local timezone. Both are generated automatically at build time, not stored with personal records. The date indicates build time, not the exact Pages publication time. The production build, static asset checks and 80 automated tests passed. Installed iPhone caching and reopening behavior remain unverified on a real device.

@@ -116,6 +116,17 @@ export function Settings({
       ) : (
         <>
           <section>
+            <h3>App version</h3>
+            <p>Version: {__BUILD_VERSION__} UTC</p>
+            <p>
+              Last updated:{" "}
+              {new Date(__BUILD_TIME__).toLocaleString(undefined, {
+                dateStyle: "long",
+                timeStyle: "short",
+              })}
+            </p>
+          </section>
+          <section>
             <h3>Calorie summary</h3>
             <label>
               Show in Progress

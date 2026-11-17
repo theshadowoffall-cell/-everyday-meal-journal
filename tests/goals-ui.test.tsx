@@ -55,6 +55,9 @@ it("keeps totals on Progress and lets the user switch goal direction without los
       ["monthly", /This month.*500 kcal\/day/],
     ] as const) {
       fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+      expect(screen.getByRole("heading", { name: "App version" })).toBeTruthy();
+      expect(screen.getByText("Version: 20261117193500 UTC")).toBeTruthy();
+      expect(screen.getByText(/Last updated: November 17, 2026/)).toBeTruthy();
       fireEvent.change(screen.getByLabelText("Show in Progress"), {
         target: { value: view },
       });

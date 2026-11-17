@@ -221,10 +221,7 @@ export function FoodDetails({
                       }
                     />
                   </label>
-                  <p className="muted">
-                    Copy the serving and calories from the label. Use g, ml, or
-                    a named serving.
-                  </p>
+                  <p className="muted">Use the serving on the label.</p>
                 </>
               )}
             </>
@@ -242,13 +239,6 @@ export function FoodDetails({
             />
           </label>
           <label>
-            Type <span className="muted">optional</span>
-            <input
-              value={f.type || ""}
-              onChange={(e) => setF({ ...f, type: e.target.value })}
-            />
-          </label>
-          <label>
             Description
             <textarea
               value={f.description || ""}
@@ -260,13 +250,6 @@ export function FoodDetails({
             <textarea
               value={f.ingredients || ""}
               onChange={(e) => setF({ ...f, ingredients: e.target.value })}
-            />
-          </label>
-          <label>
-            Notes
-            <textarea
-              value={f.notes || ""}
-              onChange={(e) => setF({ ...f, notes: e.target.value })}
             />
           </label>
           <label className="check-label">
@@ -313,9 +296,6 @@ export function FoodDetails({
               Remove photo from food
             </button>
           )}
-          <p className="muted">
-            Historical meals keep their original text and photos.
-          </p>
         </>
       ) : (
         <>

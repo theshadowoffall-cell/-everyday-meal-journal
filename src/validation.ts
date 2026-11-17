@@ -270,6 +270,11 @@ export function validateData(d: any): asserts d is Data {
           p.calorieGoals.length),
     "Invalid calorie goals.",
   );
+  assert(
+    p.calorieView === undefined ||
+      ["daily", "weekly", "monthly"].includes(p.calorieView),
+    "Invalid calorie summary preference.",
+  );
   for (const k of ["voiceMode", "scanMode"])
     assert(
       p[k] === undefined || ["manual", "automatic"].includes(p[k]),

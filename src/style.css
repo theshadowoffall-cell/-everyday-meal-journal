@@ -882,3 +882,21 @@ body,
   position: absolute;
   bottom: 2px;
 }
+.meal-name-calories {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.meal-name-calories small {
+  white-space: nowrap;
+  margin-top: 0;
+}
+button,
+input,
+select,
+textarea,
+a {
+  touch-action: manipulation;
+}

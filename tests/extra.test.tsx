@@ -32,7 +32,7 @@ afterEach(async () => {
 it("fresh launch has no fabricated records, pins or calories; one and two pins render real tiles", async () => {
   render(<App database={db} />);
   await screen.findByRole("heading", { name: "Today" });
-  expect(screen.getByText("Pin a meal")).toBeTruthy();
+  expect(screen.getByText("Add a favourite")).toBeTruthy();
   expect((await db.read()).meals).toHaveLength(0);
   expect(screen.queryByText("Chicken & rice")).toBeNull();
   cleanup();
@@ -45,8 +45,17 @@ it("fresh launch has no fabricated records, pins or calories; one and two pins r
     1,
   );
   expect(
-    screen.queryByRole("button", { name: "Add Yogurt & berries" }),
-  ).toBeNull();
+    screen.getByRole("button", { name: "Add Yogurt & berries" }),
+  ).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Add Yogurt & berries" }));
+  await screen.findByRole("dialog", { name: "Add meal" });
+  fireEvent.click(screen.getByRole("button", { name: "Save meal" }));
+  await waitFor(async () => expect((await db.read()).meals).toHaveLength(2));
+  expect(
+    (await db.read()).meals.some((meal) =>
+      meal.items.some((item) => item.name === "Yogurt & berries"),
+    ),
+  ).toBe(true);
 });
 it("modal Escape uses current close handler and focus stays in sheet", () => {
   const first = vi.fn(),

@@ -72,62 +72,6 @@ export function Progress({
   return (
     <>
       <section>
-        <h2>Calories</h2>
-        <p>
-          Today:{" "}
-          {todayCalories.hasMeals
-            ? `${Math.round(todayCalories.known)} kcal${todayCalories.complete ? "" : " · incomplete"}`
-            : "No meals recorded"}
-        </p>
-        <p>
-          Last week ({lastStart} to {lastEnd}): {averageText(lastAvg)}
-        </p>
-        <p>
-          This month ({monthStart} to {today}): {averageText(monthAvg)}
-        </p>
-        <p className="muted">
-          Averages include only recorded days with complete calorie information.
-          Goal markers use logged meals; days with unknown calories have no goal
-          result.
-        </p>
-        <label>
-          Daily calorie goal
-          <input
-            type="number"
-            min="1"
-            max="100000"
-            step="1"
-            value={goalText}
-            onChange={(e) => setGoalText(e.target.value)}
-          />
-        </label>
-        <label>
-          Goal is met when calories are
-          <select
-            value={direction}
-            onChange={(e) => setDirection(e.target.value as typeof direction)}
-          >
-            <option value="at_or_below">At or below goal</option>
-            <option value="at_or_above">At or above goal</option>
-          </select>
-        </label>
-        <button
-          disabled={
-            !Number.isFinite(Number(goalText)) ||
-            Number(goalText) <= 0 ||
-            Number(goalText) > 100000
-          }
-          onClick={() =>
-            void saveGoal(Number(goalText), direction)
-              .then(() => setGoalMessage("Goal saved from today."))
-              .catch((e) => setGoalMessage(e.message))
-          }
-        >
-          Save goal
-        </button>
-        <p role="status">{goalMessage}</p>
-      </section>
-      <section>
         <div className="section-heading">
           <button aria-label="Previous month" onClick={() => change(-1)}>
             ‹
@@ -216,6 +160,61 @@ export function Progress({
             Today →
           </button>
         )}
+      </section>
+      <section>
+        <h2>Calories</h2>
+        {(data.preferences[0].calorieView || "daily") === "daily" ? (
+          <p>
+            Today:{" "}
+            {todayCalories.hasMeals
+              ? `${Math.round(todayCalories.known)} kcal${todayCalories.complete ? "" : " · incomplete"}`
+              : "No meals recorded"}
+          </p>
+        ) : data.preferences[0].calorieView === "weekly" ? (
+          <p>Last week: {averageText(lastAvg)}</p>
+        ) : (
+          <p>This month: {averageText(monthAvg)}</p>
+        )}
+        {data.preferences[0].calorieView !== "daily" &&
+          data.preferences[0].calorieView !== undefined && (
+            <p className="muted">Complete logged days only.</p>
+          )}
+        <label>
+          Daily calorie goal
+          <input
+            type="number"
+            min="1"
+            max="100000"
+            step="1"
+            value={goalText}
+            onChange={(e) => setGoalText(e.target.value)}
+          />
+        </label>
+        <label>
+          Goal is met when calories are
+          <select
+            value={direction}
+            onChange={(e) => setDirection(e.target.value as typeof direction)}
+          >
+            <option value="at_or_below">At or below goal</option>
+            <option value="at_or_above">At or above goal</option>
+          </select>
+        </label>
+        <button
+          disabled={
+            !Number.isFinite(Number(goalText)) ||
+            Number(goalText) <= 0 ||
+            Number(goalText) > 100000
+          }
+          onClick={() =>
+            void saveGoal(Number(goalText), direction)
+              .then(() => setGoalMessage("Goal saved from today."))
+              .catch((e) => setGoalMessage(e.message))
+          }
+        >
+          Save goal
+        </button>
+        <p role="status">{goalMessage}</p>
       </section>
       <section className="week-summary">
         <h2>This week so far</h2>

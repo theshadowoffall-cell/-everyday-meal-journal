@@ -65,3 +65,8 @@ Ranked Canadian, USDA and saved-food searches by how closely the food name match
 ## Serving-based search and calorie goals
 
 Improved prefix/name/portion relevance for app/apple, egg, pizza and pizza slice; default serving uses only documented portion weights, falling back to an explicit 100 g when none is suitable. Removed meal title/notes input controls while preserving legacy fields. Moved daily totals and last completed week/current month averages to Progress; averages use only recorded complete days. Added dated, user-selectable at-or-below/at-or-above goals and accessible calendar dots; unknown and unlogged days are not marked met or missed. Goal preferences are validated and backed up with existing versioned data. Final TypeScript/Vite build, static asset check and 73 automated tests passed. Native iPhone behavior remains unverified.
+
+
+## Simpler food and calorie display
+
+Removed Type and Notes controls from saved-food editing while retaining stored values. The Aliases control remains pending the user’s explicit continuation. All active favourites can be quick-added on Today; meal and favourite calories appear beside names. Settings chooses the daily, last-week or current-month calorie summary in Progress; the preference is validated and backed up. Unknown meal calories are labelled unknown. Existing zoom restrictions remain in place. Production build and static asset check passed; all 75 automated tests passed, including unpinned favourite saving, old food metadata preservation and preference backup validation. Real iPhone zoom and layout remain unverified.

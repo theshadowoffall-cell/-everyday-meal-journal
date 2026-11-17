@@ -76,6 +76,7 @@ export type Preferences = {
   lastExport?: string;
   reminderDismissed?: boolean;
   speechConsent?: boolean;
+  calorieView?: "daily" | "weekly" | "monthly";
   calorieGoals?: Array<{
     from: string;
     target: number;

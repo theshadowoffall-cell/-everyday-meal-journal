@@ -9,14 +9,19 @@ export function Settings({
   exported,
   replace,
   dismiss,
+  setCalorieView,
 }: {
   data: Data;
   close: () => void;
   exported: (s: string) => Promise<void>;
   replace: (d: Data) => Promise<void>;
   dismiss: () => void;
+  setCalorieView?: (view: "daily" | "weekly" | "monthly") => Promise<void>;
 }) {
   const [incoming, setIncoming] = useState<Data>();
+  const [calorieView, setView] = useState<"daily" | "weekly" | "monthly">(
+    data.preferences[0].calorieView || "daily",
+  );
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState("");
@@ -111,15 +116,36 @@ export function Settings({
       ) : (
         <>
           <section>
+            <h3>Calorie summary</h3>
+            <label>
+              Show in Progress
+              <select
+                value={calorieView}
+                onChange={(e) => {
+                  const previous = calorieView;
+                  const next = e.target.value as typeof calorieView;
+                  setView(next);
+                  void setCalorieView?.(next).catch((err) => {
+                    setView(previous);
+                    setError(err.message);
+                  });
+                }}
+              >
+                <option value="daily">Today</option>
+                <option value="weekly">Last week average</option>
+                <option value="monthly">This month average</option>
+              </select>
+            </label>
+          </section>
+          <section>
             <h3>Your records, on this device</h3>
             <p>
-              No app account or cloud sync. Local records are not cloud backups.
-              Browser storage can be cleared by the device.
+              Records stay on this device. Export a backup; browser data can be
+              cleared.
             </p>
             <p>
-              Safari and a Home Screen installation may hold separate records.
-              Use export and restore when moving between them or to a different
-              address.
+              Safari and the Home Screen app may have separate records. Export
+              before switching.
             </p>
             <button
               className="full"

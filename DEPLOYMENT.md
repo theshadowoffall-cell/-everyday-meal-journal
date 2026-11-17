@@ -34,3 +34,8 @@ The release prioritizes direct food-name matches and common whole eggs over inci
 ## Serving and goal release
 
 The release adds closer food/portion matching, documented serving defaults, Progress-only calorie summaries and dated goals with user-selectable direction and calendar markers. Legacy meal title and notes values remain stored. Averages exclude incomplete and unlogged days. Final build, asset checks and 73 automated tests passed; native iPhone behavior remains unverified.
+
+
+## Simpler food and calorie display
+
+The release simplifies saved-food editing, makes all active favourites available for quick adding, and lets Settings choose one calorie summary in Progress. Stored legacy details remain intact; the Aliases control remains until the user confirms its removal. Production build, static asset checks and 75 automated tests passed. Real iPhone zoom and layout remain unverified.

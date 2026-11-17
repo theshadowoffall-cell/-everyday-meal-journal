@@ -1,3 +1,4 @@
+import { itemCalories } from "./calories";
 import { useEffect, useRef } from "react";
 import type { Data, Food, Meal } from "./types";
 import { dateLabel, localDate, week } from "./dates";
@@ -42,6 +43,13 @@ export function Today({
   const pinned = data.preferences[0].pins
     .map((id) => data.foods.find((f) => f.id === id))
     .filter((f): f is Food => !!f && !f.archived);
+  const favouriteIds = new Set(pinned.map((f) => f.id));
+  const favourites = [
+    ...pinned,
+    ...data.foods
+      .filter((f) => f.favourite && !f.archived && !favouriteIds.has(f.id))
+      .sort((a, b) => a.name.localeCompare(b.name)),
+  ];
   return (
     <>
       <section className="week-section">
@@ -121,11 +129,14 @@ export function Today({
           </button>
         </div>
         <div className="favourites">
-          {pinned.map((f) => (
+          {favourites.map((f) => (
             <div className="favourite" key={f.id}>
               <button className="tile-details" onClick={() => details(f)}>
                 <Photo url={urls[f.imageId || ""]} name={f.name} />
                 <strong>{f.name}</strong>
+                {itemCalories(f.calorie) !== undefined && (
+                  <small>{Math.round(itemCalories(f.calorie)!)} kcal</small>
+                )}
               </button>
               <button
                 className="square"
@@ -137,9 +148,9 @@ export function Today({
             </div>
           ))}
         </div>
-        {pinned.length < 2 && (
+        {favourites.length === 0 && (
           <button className="pin-empty" onClick={library}>
-            <Icon name="plus" /> Pin a meal
+            <Icon name="plus" /> Add a favourite
           </button>
         )}
       </section>
@@ -154,7 +165,7 @@ export function Today({
           meals={data.meals.filter((m) => m.date === date)}
           onClick={editMeal}
           urls={urls}
-          showCalories={false}
+          showCalories={true}
         />
         {!data.meals.some((m) => m.date === date) && (
           <Empty>

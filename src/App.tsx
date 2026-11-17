@@ -612,6 +612,12 @@ export function App({ database }: { database?: JournalDB }) {
         <Settings
           data={data}
           close={() => setSettings(false)}
+          setCalorieView={async (view) => {
+            await db.prefs((p) => {
+              p.calorieView = view;
+            }, generation.current);
+            await refresh();
+          }}
           exported={(s) =>
             db.prefs((p) => {
               p.lastExport = s;

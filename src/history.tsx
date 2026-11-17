@@ -1,4 +1,4 @@
-import { calorieTotal } from "./calories";
+import { calorieTotal, itemCalories } from "./calories";
 import { categories, type Meal } from "./types";
 import { Photo, Icon } from "./ui";
 export function MealRows({
@@ -36,17 +36,23 @@ export function MealRows({
                   name=""
                 />
                 <span>
-                  <strong>
-                    {m.title || m.items.map((i) => i.name).join(" + ")}
-                  </strong>
-                  {showCalories && (
-                    <small id={`calories-${m.id}`}>
-                      {(() => {
-                        const t = calorieTotal(m.items);
-                        return `${Math.round(t.known)} kcal${t.complete ? "" : " · incomplete"}`;
-                      })()}
-                    </small>
-                  )}
+                  <span className="meal-name-calories">
+                    <strong>
+                      {m.title || m.items.map((i) => i.name).join(" + ")}
+                    </strong>
+                    {showCalories && (
+                      <small id={`calories-${m.id}`}>
+                        {(() => {
+                          const t = calorieTotal(m.items);
+                          return m.items.every(
+                            (i) => itemCalories(i.calorie) === undefined,
+                          )
+                            ? "Calories unknown"
+                            : `${Math.round(t.known)} kcal${t.complete ? "" : " · incomplete"}`;
+                        })()}
+                      </small>
+                    )}
+                  </span>
                   {(m.title || m.notes) && (
                     <small>
                       {m.title

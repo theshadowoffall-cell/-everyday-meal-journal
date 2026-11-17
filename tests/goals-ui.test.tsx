@@ -49,8 +49,22 @@ it("keeps totals on Progress and lets the user switch goal direction without los
     expect(screen.queryByText(/Calories: 500 kcal/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Progress" }));
     expect(screen.getByText(/Today: 500 kcal/)).toBeTruthy();
-    expect(screen.getByText(/Last week.*500 kcal\/day/)).toBeTruthy();
-    expect(screen.getByText(/This month.*500 kcal\/day/)).toBeTruthy();
+    expect(screen.queryByText(/Last week.*500 kcal\/day/)).toBeNull();
+    for (const [view, text] of [
+      ["weekly", /Last week.*500 kcal\/day/],
+      ["monthly", /This month.*500 kcal\/day/],
+    ] as const) {
+      fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+      fireEvent.change(screen.getByLabelText("Show in Progress"), {
+        target: { value: view },
+      });
+      await waitFor(async () =>
+        expect((await db.read()).preferences[0].calorieView).toBe(view),
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Close" }));
+      await waitFor(() => expect(screen.getByText(text)).toBeTruthy());
+      expect(screen.queryByText(/Today: 500 kcal/)).toBeNull();
+    }
     fireEvent.change(screen.getByLabelText("Daily calorie goal"), {
       target: { value: "600" },
     });

@@ -1,17 +1,11 @@
-# GitHub Pages deployment
+# Deployment verified
 
-Source and production files have been pushed successfully to:
-https://github.com/theshadowoffall-cell/-everyday-meal-journal
+Live app: https://theshadowoffall-cell.github.io/-everyday-meal-journal/
 
-Publishing files are in `docs/`; source is at the repository root. The production code is the previously validated build (29 automated tests, TypeScript/Vite build, portable asset checks and real synthetic-label CPU OCR passed). No application code changed for this upload. Real iPhone and rendered browser checks remain outstanding.
+GitHub Pages publishes `main` /docs with HTTPS enforced. The owner corrected the Pages setting after the integration could not change it. GitHub reported a successful build for commit `8ce1796dde06babe46859f12f8c841d60cd20980`.
 
-## One owner action remains
+Verification recorded 2026-11-17T04:45:50.111479+00:00: the exact public root URL returned HTTP 200 with production HTML. All 18 application assets (HTML, JS, CSS, manifest, icons, worker, WASM engines and English/French OCR data) returned HTTP 200 and byte-for-byte SHA-256 matches against the validated production bundle. MIME types were appropriate for scripts, styles, manifest, images and WASM.
 
-The integration successfully pushed to main, but `POST /repos/theshadowoffall-cell/-everyday-meal-journal/pages` returned HTTP 403, `Resource not accessible by integration`. Pages has not been enabled by this session, and no successful deployment is claimed.
+These are live HTTP/asset checks, not a rendered-browser or iPhone test. Native Safari/Home Screen speech, camera, OCR worker execution, downloads, storage durability, keyboard and screenshot checks remain outstanding as described in VALIDATION.md. No application code changed during deployment.
 
-Open https://github.com/theshadowoffall-cell/-everyday-meal-journal/settings/pages . Choose **Deploy from a branch**, then **main** and **/docs**, then **Save**. Keep the leading hyphen in the repository name.
-
-Expected address after GitHub completes publishing:
-https://theshadowoffall-cell.github.io/-everyday-meal-journal/
-
-Once Pages reports success, verify the HTTPS page, reload, manifest/icons, lazy OCR files, and iPhone flows. This URL is an expected destination until those checks succeed. Personal meals/workouts/photos are not in this repository; they are stored in each visitor's browser.
+Open the live URL in Safari, then Share → Add to Home Screen. Keep this origin stable and export local records regularly. Personal records remain in each visitor's browser; they are not in the public repository.

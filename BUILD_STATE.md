@@ -18,3 +18,8 @@ GitHub deployment attempted: authenticated account available, but POST /user/rep
 ## Repository handoff
 
 Owner supplied https://github.com/theshadowoffall-cell/-everyday-meal-journal . Verified empty/public repository and push access, then uploaded the existing source and production build (main branch, /docs). No application code changed or redundant test rerun performed. Enabling GitHub Pages through API returned 403 Resource not accessible by integration. Owner must select main /docs in Settings → Pages. See DEPLOYMENT.md.
+
+
+## Live deployment verified
+
+Owner set Pages to main /docs. GitHub reported built; exact HTTPS root and all 18 production assets returned 200 and matched local build hashes. No runtime changes. iPhone and rendered layout checks remain pending.

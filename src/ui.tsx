@@ -155,3 +155,24 @@ export function Photo({ url, name }: { url?: string; name: string }) {
     </span>
   );
 }
+
+export function InputModeSwitch({
+  mode,
+  onChange,
+}: {
+  mode: "manual" | "automatic";
+  onChange: (mode: "manual" | "automatic") => void;
+}) {
+  const automatic = mode === "automatic";
+  return (
+    <button
+      type="button"
+      className="input-mode-switch"
+      aria-label={`Input mode: ${automatic ? "automatic" : "manual"}. Switch to ${automatic ? "manual" : "automatic"}.`}
+      onClick={() => onChange(automatic ? "manual" : "automatic")}
+    >
+      <span aria-hidden="true">↻</span>
+      {automatic ? "Automatic" : "Manual"}
+    </button>
+  );
+}

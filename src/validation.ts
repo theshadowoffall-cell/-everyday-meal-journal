@@ -253,6 +253,11 @@ export function validateData(d: any): asserts d is Data {
     ),
     "Pinned food is missing or archived.",
   );
+  for (const k of ["voiceMode", "scanMode"])
+    assert(
+      p[k] === undefined || ["manual", "automatic"].includes(p[k]),
+      "Invalid input mode preference.",
+    );
   for (const k of ["speechConsent", "reminderDismissed"])
     assert(
       p[k] === undefined || typeof p[k] === "boolean",

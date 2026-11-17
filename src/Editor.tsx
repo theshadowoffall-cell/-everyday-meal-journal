@@ -159,6 +159,15 @@ export function Editor({
       {draft.items.map((item, index) => (
         <fieldset key={`calorie-${index}`}>
           <legend>Calories for {item.name || `item ${index + 1}`}</legend>
+          {item.label && (
+            <details>
+              <summary>
+                Scanned label{" "}
+                {item.label.reviewed ? "(reviewed)" : "(unreviewed)"}
+              </summary>
+              <p className="preserve">{item.label.text || "Photo only"}</p>
+            </details>
+          )}
           <p className="muted">
             Optional. Enter a value from your food label; leave blank if
             unknown.

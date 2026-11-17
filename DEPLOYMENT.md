@@ -14,3 +14,8 @@ Open the live URL in Safari, then Share → Add to Home Screen. Keep this origin
 ## Zoom interaction update
 
 Viewport scaling, pinch and double-tap gestures are restricted at the user’s request. One-finger scrolling stays enabled. Safari gesture guards supplement viewport/CSS controls; device accessibility overrides can still apply. TypeScript, production build and asset checks passed. Real iPhone gesture testing remains unverified.
+
+
+## Automatic input release
+
+The current release candidate adds independent saved Manual/Automatic settings for voice and scan, conservative unreviewed calorie extraction, and historical label viewing. It also includes the previously prepared calorie upgrade. GitHub Pages publishes from main /docs. Final regression: 51 tests, production build and asset checks passed; iPhone-specific functionality is unverified.

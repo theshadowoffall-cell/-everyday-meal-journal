@@ -76,6 +76,8 @@ export type Preferences = {
   lastExport?: string;
   reminderDismissed?: boolean;
   speechConsent?: boolean;
+  voiceMode?: "manual" | "automatic";
+  scanMode?: "manual" | "automatic";
 };
 export type Meta = {
   id: "generation";

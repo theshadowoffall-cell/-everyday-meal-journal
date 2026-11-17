@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Food, ImageAsset, Item } from "./types";
-import { newId, base } from "./types";
+import { newId, base, snapshot } from "./types";
 import {
   matches,
   Operation,
@@ -8,24 +8,32 @@ import {
   type RecognitionLike,
 } from "./input";
 import { preparePhoto, recognize, releaseOCR } from "./ocr";
-import { Modal } from "./ui";
+import { Modal, InputModeSwitch } from "./ui";
+import { extractLabelCalories } from "./labelCalories";
 export function Voice({
   foods,
   consent,
   acceptConsent,
   close,
   use,
+  initialMode = "manual",
+  onModeChange,
 }: {
   foods: Food[];
   consent: boolean;
   acceptConsent: () => Promise<void>;
   close: () => void;
   use: (i: Item) => void;
+  initialMode?: "manual" | "automatic";
+  onModeChange?: (mode: "manual" | "automatic") => void;
 }) {
   const [text, setText] = useState("");
   const [selected, setSelected] = useState("");
   const [status, setStatus] = useState("");
   const [listening, setListening] = useState(false);
+  const [mode, setMode] = useState<"manual" | "automatic">(initialMode);
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
   const operation = useRef(new Operation());
   const recognition = useRef<RecognitionLike | undefined>(undefined);
   const Constructor = recognitionConstructor();
@@ -51,8 +59,9 @@ export function Voice({
   async function start() {
     if (!Constructor) return;
     try {
-      if (!consent) await acceptConsent();
       const id = operation.current.start();
+      if (!consent) await acceptConsent();
+      if (!operation.current.current(id)) return;
       const r = new Constructor();
       recognition.current = r;
       r.lang = navigator.language || "en-CA";
@@ -66,6 +75,13 @@ export function Voice({
           .trim();
         setText(result);
         setSelected("");
+        if (result && modeRef.current === "automatic") {
+          const found = matches(result, foods);
+          const item =
+            found.length === 1 ? snapshot(found[0]) : { name: result };
+          stop();
+          use(item);
+        }
       };
       r.onerror = (e) => {
         if (!operation.current.current(id)) return;
@@ -108,7 +124,18 @@ export function Voice({
         close();
       }}
     >
-      <p>Review a name or description before adding it to your meal.</p>
+      <InputModeSwitch
+        mode={mode}
+        onChange={(next) => {
+          setMode(next);
+          onModeChange?.(next);
+        }}
+      />
+      <p>
+        {mode === "automatic"
+          ? "Recognized speech is added to your meal draft automatically."
+          : "Review a name or description before adding it to your meal."}
+      </p>
       <p className="muted">
         Browser speech may send audio to your browser provider for processing.
         This app does not retain audio.
@@ -126,6 +153,8 @@ export function Voice({
       <p className="muted">
         Keyboard tip: tap the text field, then use the microphone on your iPhone
         keyboard if available. This page cannot activate keyboard dictation.
+        When using keyboard dictation, tap Use transcript to return to your
+        draft.
       </p>
       <label>
         Transcript
@@ -218,13 +247,26 @@ export function Scan({
   close,
   save,
   add,
+  autoUse,
+  initialMode = "manual",
+  onModeChange,
 }: {
   foods: Food[];
   target?: Food;
   close: () => void;
   save: (f: Food, image?: ImageAsset) => Promise<Food>;
   add: (f: Food) => void;
+  autoUse: (
+    item: Item,
+    image: ImageAsset | undefined,
+    active: () => boolean,
+  ) => Promise<void>;
+  initialMode?: "manual" | "automatic";
+  onModeChange?: (mode: "manual" | "automatic") => void;
 }) {
+  const [mode, setMode] = useState<"manual" | "automatic">(initialMode);
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
   const [foodId, setFoodId] = useState(target?.id || "");
   const [name, setName] = useState("");
   const [text, setText] = useState("");
@@ -252,7 +294,7 @@ export function Scan({
     return () => {
       op.current.cancel();
       void releaseOCR();
-      if (photo.current) (photo.current as any).blob = null;
+      photo.current = undefined;
       document.removeEventListener("visibilitychange", hide);
     };
   }, []);
@@ -271,25 +313,40 @@ export function Scan({
     try {
       const p = await preparePhoto(file);
       if (!op.current.current(id)) return;
-      photo.current = { id: newId(), mime: p.blob.type, ...p };
+      const asset = { id: newId(), mime: p.blob.type, ...p };
+      photo.current = asset;
       setUrl(URL.createObjectURL(p.blob));
       setProgress("Photo ready. Check that the label is readable.");
+      if (modeRef.current === "automatic") await run(asset);
     } catch (e) {
       if (op.current.current(id)) setError((e as Error).message);
     }
   }
-  async function run() {
-    if (!photo.current) return;
+  async function run(asset = photo.current) {
+    if (!asset) return;
     const id = op.current.start();
     setBusy(true);
     setError("");
     setReviewed(false);
     try {
-      const out = await recognize(photo.current.blob, (s) => {
+      const out = await recognize(asset.blob, (s) => {
         if (op.current.current(id)) setProgress(s);
       });
       if (op.current.current(id)) {
         setText(out);
+        if (out.trim() && modeRef.current === "automatic") {
+          const food = foods.find((f) => f.id === foodId);
+          const item: Item = food
+            ? snapshot(food)
+            : { name: name.trim() || "Scanned food" };
+          item.label = { text: out, reviewed: false, imageId: asset.id };
+          item.calorie = extractLabelCalories(out);
+          const active = () =>
+            op.current.current(id) && modeRef.current === "automatic";
+          await autoUse(item, asset, active);
+          if (active()) op.current.cancel();
+          return;
+        }
         setProgress(
           out.trim()
             ? "Extracted text is unreviewed. Check units, serving sizes and uncertain text."
@@ -341,6 +398,13 @@ export function Scan({
         close();
       }}
     >
+      <InputModeSwitch
+        mode={mode}
+        onChange={(next) => {
+          setMode(next);
+          onModeChange?.(next);
+        }}
+      />
       {saved ? (
         <>
           <p className="notice">
@@ -356,8 +420,9 @@ export function Scan({
       ) : (
         <>
           <p>
-            A label is a reference, not a nutrition calculation. Photos and OCR
-            stay on your device.
+            {mode === "automatic"
+              ? "After you choose a photo, the scan is added to your meal draft. Calories are included only when the label states an unambiguous value and serving. Scanned text is unreviewed."
+              : "A label is a reference, not a nutrition calculation. Photos and OCR stay on your device."}
           </p>
           <label>
             Camera or photo

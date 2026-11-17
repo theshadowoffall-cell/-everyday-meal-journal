@@ -52,10 +52,36 @@ export function App({ database }: { database?: JournalDB }) {
   const queue = useRef(Promise.resolve());
   const draftError = useRef("");
   const persistedRevision = useRef(0);
+  const [voiceModeOverride, setVoiceModeOverride] = useState<
+    "manual" | "automatic"
+  >();
+  const [scanModeOverride, setScanModeOverride] = useState<
+    "manual" | "automatic"
+  >();
+  const modeOperations = useRef({ voice: 0, scan: 0 });
+  function setInputMode(kind: "voice" | "scan", mode: "manual" | "automatic") {
+    const operation = ++modeOperations.current[kind];
+    const requestGeneration = generation.current;
+    const setOverride =
+      kind === "voice" ? setVoiceModeOverride : setScanModeOverride;
+    setOverride(mode);
+    void perform(async () => {
+      await db.prefs((p) => {
+        if (kind === "voice") p.voiceMode = mode;
+        else p.scanMode = mode;
+      }, requestGeneration);
+      await refresh();
+      if (modeOperations.current[kind] === operation) setOverride(undefined);
+    });
+  }
   async function refresh() {
     const next = await db.read();
     if (next.meta[0].value < generation.current) return;
     if (next.meta[0].value !== generation.current) {
+      modeOperations.current.voice++;
+      modeOperations.current.scan++;
+      setVoiceModeOverride(undefined);
+      setScanModeOverride(undefined);
       setFlow(undefined);
       setScanTarget(undefined);
       setUndo(undefined);
@@ -514,6 +540,8 @@ export function App({ database }: { database?: JournalDB }) {
         <Voice
           foods={data.foods}
           consent={!!data.preferences[0].speechConsent}
+          initialMode={voiceModeOverride ?? data.preferences[0].voiceMode}
+          onModeChange={(mode) => setInputMode("voice", mode)}
           acceptConsent={() =>
             db.prefs((p) => {
               p.speechConsent = true;
@@ -527,9 +555,30 @@ export function App({ database }: { database?: JournalDB }) {
         <Scan
           foods={data.foods}
           target={scanTarget}
+          initialMode={scanModeOverride ?? data.preferences[0].scanMode}
+          onModeChange={(mode) => setInputMode("scan", mode)}
           close={() => setFlow(undefined)}
           save={saveFood}
           add={addFood}
+          autoUse={async (item, image, active) => {
+            await queue.current;
+            if (!active()) return;
+            if (draftError.current) throw Error(draftError.current);
+            if (image)
+              await db.mutate(generation.current, (d) => {
+                if (!active()) return;
+                if (!d.images.some((existing) => existing.id === image.id))
+                  d.images.push({ ...image });
+              });
+            if (!active()) return;
+            setFlow(undefined);
+            if (editor && draftRef.current)
+              changeDraft({
+                ...draftRef.current,
+                items: [...draftRef.current.items, item],
+              });
+            else initiate([item]);
+          }}
         />
       )}
       {food !== undefined && !flow && !replacement && (
@@ -574,6 +623,10 @@ export function App({ database }: { database?: JournalDB }) {
             draftRef.current = incoming.drafts[0];
             persistedRevision.current = incoming.drafts[0]?.revision || 0;
             setDraft(incoming.drafts[0]);
+            modeOperations.current.voice++;
+            modeOperations.current.scan++;
+            setVoiceModeOverride(undefined);
+            setScanModeOverride(undefined);
             setUndo(undefined);
             setMessage("");
             setEditor(false);
@@ -673,6 +726,21 @@ export function App({ database }: { database?: JournalDB }) {
             <div key={n}>
               <h3>{i.name}</h3>
               {i.description && <p>{i.description}</p>}
+              {i.label && (
+                <details>
+                  <summary>
+                    Label {i.label.reviewed ? "(reviewed)" : "(unreviewed)"}
+                  </summary>
+                  {i.label.imageId && urls[i.label.imageId] && (
+                    <img
+                      className="label-preview"
+                      src={urls[i.label.imageId]}
+                      alt={`Label for ${i.name}`}
+                    />
+                  )}
+                  <p className="preserve">{i.label.text || "Photo only"}</p>
+                </details>
+              )}
               {i.calorie ? (
                 <p>
                   {Math.round(itemCalories(i.calorie) ?? 0)} kcal ·{" "}

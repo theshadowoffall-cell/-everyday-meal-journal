@@ -850,6 +850,16 @@ body {
 }
 
 /* Keep the journal at app scale while preserving one-finger scrolling. */
-html, body, #root {
+html,
+body,
+#root {
   touch-action: pan-x pan-y;
+}
+
+.input-mode-switch {
+  width: 100%;
+  justify-content: space-between;
+  color: var(--green);
+  border-color: #8a9a82;
+  margin-bottom: 14px;
 }

@@ -32,14 +32,9 @@ export function Today({
     isToday = date === today,
     w = data.workouts.find((w) => w.id === date);
   const selected = useRef<HTMLButtonElement>(null);
-  useEffect(
-    () =>
-      selected.current?.scrollIntoView?.({
-        block: "nearest",
-        inline: "center",
-      }),
-    [date],
-  );
+  useEffect(() => {
+    selected.current?.scrollIntoView?.({ block: "nearest", inline: "center" });
+  }, [date]);
   const pinned = data.preferences[0].pins
     .map((id) => data.foods.find((f) => f.id === id))
     .filter((f): f is Food => !!f && !f.archived);

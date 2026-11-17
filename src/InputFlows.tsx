@@ -281,6 +281,7 @@ export function Scan({
   const [error, setError] = useState("");
   const [saved, setSaved] = useState<Food>();
   const photo = useRef<ImageAsset | undefined>(undefined);
+  const usingResult = useRef(false);
   const op = useRef(new Operation());
   const textRef = useRef(text);
   textRef.current = text;
@@ -321,7 +322,7 @@ export function Scan({
       photo.current = asset;
       setUrl(URL.createObjectURL(p.blob));
       setProgress("Photo ready. Check that the label is readable.");
-      if (modeRef.current === "automatic") await run(asset);
+      await run(asset);
     } catch (e) {
       if (op.current.current(id)) setError((e as Error).message);
     }
@@ -331,12 +332,15 @@ export function Scan({
     const id = op.current.start();
     setBusy(true);
     setError("");
+    setProgress("Preparing scanner… The first scan may take a minute.");
     setReviewed(false);
+    let scanned = false;
     try {
       const out = await recognize(asset.blob, (s) => {
         if (op.current.current(id)) setProgress(s);
       });
       if (op.current.current(id)) {
+        scanned = true;
         setText(out);
         if (out.trim() && modeRef.current === "automatic") {
           const food = foods.find((f) => f.id === foodId);
@@ -358,8 +362,47 @@ export function Scan({
         );
       }
     } catch (e) {
-      if (op.current.current(id)) setError((e as Error).message);
+      if (op.current.current(id)) {
+        const detail =
+          e instanceof Error ? e.message : typeof e === "string" ? e : "";
+        setError(
+          scanned
+            ? detail || "Could not add the scan. Try again."
+            : `Could not scan the photo. Check your internet connection and try again.${detail ? ` (${detail})` : ""}`,
+        );
+        setProgress("Scan stopped. Your photo is still available.");
+      }
     } finally {
+      if (op.current.current(id)) setBusy(false);
+    }
+  }
+  async function useReviewed() {
+    if (usingResult.current || !reviewed || !text.trim()) return;
+    usingResult.current = true;
+    const id = op.current.start();
+    setBusy(true);
+    setError("");
+    try {
+      const food = foods.find((f) => f.id === foodId);
+      const item: Item = food
+        ? snapshot(food)
+        : { name: name.trim() || "Scanned food" };
+      item.label = { text, reviewed: true, imageId: photo.current?.id };
+      const detected = extractLabelCalories(text);
+      item.calorie = detected
+        ? { ...detected, source: "Scanned label (reviewed)" }
+        : undefined;
+      const active = () => op.current.current(id);
+      await autoUse(item, photo.current, active);
+      if (active()) {
+        setBusy(false);
+        op.current.cancel();
+      }
+    } catch (e) {
+      if (op.current.current(id))
+        setError((e as Error).message || "Could not add the scan. Try again.");
+    } finally {
+      usingResult.current = false;
       if (op.current.current(id)) setBusy(false);
     }
   }
@@ -374,9 +417,13 @@ export function Scan({
         favourite: false,
         archived: false,
       };
+      const detected = !photoOnly ? extractLabelCalories(text) : undefined;
       const result = await save(
         {
           ...f,
+          calorie: detected
+            ? { ...detected, source: "Scanned label (reviewed)" }
+            : f.calorie,
           label: {
             text: photoOnly ? "" : text,
             reviewed: !photoOnly,
@@ -394,6 +441,7 @@ export function Scan({
     }
   }
   const canSave = !!(foodId || name.trim());
+  const detectedCalories = extractLabelCalories(text);
   return (
     <Modal
       title="Scan label"
@@ -426,23 +474,31 @@ export function Scan({
           <p>
             {mode === "automatic"
               ? "After you choose a photo, the scan is added to your meal draft. Calories are included only when the label states an unambiguous value and serving. Scanned text is unreviewed."
-              : "A label is a reference, not a nutrition calculation. Photos and OCR stay on your device."}
+              : "Scanning starts after you choose a photo. Review the result, then add it to your meal."}
           </p>
           <label>
             Camera or photo
             <input
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/*"
               capture="environment"
-              onChange={(e) => void select(e.target.files?.[0])}
+              onChange={(e) => {
+                const file = e.currentTarget.files?.[0];
+                e.currentTarget.value = "";
+                void select(file);
+              }}
             />
           </label>
           <label>
             Choose from photo library
             <input
               type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(e) => void select(e.target.files?.[0])}
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.currentTarget.files?.[0];
+                e.currentTarget.value = "";
+                void select(file);
+              }}
             />
           </label>
           {url && (
@@ -495,6 +551,13 @@ export function Scan({
               }}
             />
           </label>
+          {text.trim() && (
+            <p className="muted">
+              {detectedCalories
+                ? `Detected ${detectedCalories.calories} kcal per ${detectedCalories.unit === "g" || detectedCalories.unit === "ml" ? `${detectedCalories.basisQuantity} ${detectedCalories.unit}` : detectedCalories.unit}. Check it against the label.`
+                : "Calories not detected. You can enter them in your meal."}
+            </p>
+          )}
           <label className="check-label">
             <input
               type="checkbox"
@@ -525,6 +588,12 @@ export function Scan({
           <div className="button-stack">
             <button
               className="primary"
+              disabled={!reviewed || !text.trim() || busy}
+              onClick={() => void useReviewed()}
+            >
+              Use in meal
+            </button>
+            <button
               disabled={!canSave || !reviewed || !text.trim() || busy}
               onClick={() => void persist()}
             >

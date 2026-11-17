@@ -54,3 +54,10 @@ Settings shows the currently running build identifier and build date in the devi
 ## New app icon
 
 Updated the home-screen, manifest and browser icons to a cream bowl and checkmark on forest green. New filenames help avoid stale icon caches; older icon files remain for older cached pages. Production build, asset checks and 80 automated tests passed. The icon was not verified on a physical iPhone; iOS may retain an older installed icon until the shortcut is added again.
+
+
+## Scanner repair
+
+Both input modes now start OCR after photo selection; manual mode shows detected calories and adds a reviewed label and values to the meal draft, while automatic mode shows the unreviewed text directly in the draft. Silent worker failures (including string rejections) now surface an error and allow retry; progress is shown while loading. Compatible image formats may be selected and are converted to JPEG after device decoding. The calorie parser recognizes an unambiguous number on the line after Calories but rejects multiple columns. Existing user records are unchanged.
+
+Production build, asset checks and 83 automated tests passed. Headless Chromium at a phone-sized viewport exercised real bundled OCR with synthetic images in both modes, saved 150 kcal and verified it after reload; automatic mode was also checked using the production build under a subdirectory. A blocked-worker browser test verified a visible error and retry state. These checks are not an iPhone camera or Safari test; HEIC decoding depends on device support and complex or unclear labels can remain unknown.

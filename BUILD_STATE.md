@@ -90,3 +90,10 @@ Updated the home-screen, manifest and browser icons to a cream bowl and checkmar
 ## Bowl-only icon
 
 Removed the checkmark from the home-screen and browser icon. New icon filenames reduce cache conflicts. Production build and manifest/asset checks passed; the icon was not tested on a physical iPhone.
+
+
+## Scanner repair
+
+Both input modes now start OCR after photo selection; manual mode shows detected calories and adds a reviewed label and values to the meal draft, while automatic mode shows the unreviewed text directly in the draft. Silent worker failures (including string rejections) now surface an error and allow retry; progress is shown while loading. Compatible image formats may be selected and are converted to JPEG after device decoding. The calorie parser recognizes an unambiguous number on the line after Calories but rejects multiple columns. Existing user records are unchanged.
+
+Production build, asset checks and 83 automated tests passed. Headless Chromium at a phone-sized viewport exercised real bundled OCR with synthetic images in both modes, saved 150 kcal and verified it after reload; automatic mode was also checked using the production build under a subdirectory. A blocked-worker browser test verified a visible error and retry state. These checks are not an iPhone camera or Safari test; HEIC decoding depends on device support and complex or unclear labels can remain unknown.

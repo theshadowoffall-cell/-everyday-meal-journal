@@ -67,10 +67,8 @@ export async function recognize(blob: Blob, onProgress: (s: string) => void) {
 export async function preparePhoto(
   file: File,
 ): Promise<{ blob: Blob; width: number; height: number }> {
-  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type))
-    throw Error(
-      "Use JPEG, PNG or WebP. Convert HEIC in Photos first. Manual text is also available.",
-    );
+  if (file.type && !file.type.startsWith("image/"))
+    throw Error("Choose an image file, or enter the label text manually.");
   if (file.size > 20 * 1024 * 1024)
     throw Error(
       "Photo exceeds the 20 MiB input limit. Resize it in Photos first.",
@@ -83,7 +81,7 @@ export async function preparePhoto(
       image.onerror = () =>
         reject(
           Error(
-            "Photo could not be read. Choose another image or enter text manually.",
+            "Photo could not be read on this device. Try JPEG or PNG, or enter text manually.",
           ),
         );
       image.src = url;

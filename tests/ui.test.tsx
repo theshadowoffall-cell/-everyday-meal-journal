@@ -363,7 +363,6 @@ describe("reviewed input and restore controls; platform services are test double
     await screen.findByAltText(
       "Selected label. Check readability before scanning.",
     );
-    click("Extract label text");
     await act(async () => {
       ocrResolve("Nutrition Facts\nPer 175 g\nProtein 12 g");
     });

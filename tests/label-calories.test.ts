@@ -20,6 +20,16 @@ describe("automatic label calories", () => {
         ?.unit,
     ).toBe("serving (1 cup (39 g))");
   });
+  it("reads a calorie number on the following line but refuses two numeric columns", () => {
+    expect(
+      extractLabelCalories(
+        "Nutrition Facts\nPer 175 g\nCalories\n150\nProtein 12 g",
+      )?.calories,
+    ).toBe(150);
+    expect(
+      extractLabelCalories("Per 100 g\nCalories\n150\n300\nProtein 12 g"),
+    ).toBeUndefined();
+  });
   it("refuses missing servings, repeated calories and uncertain OCR", () => {
     for (const text of [
       "Calories 150",

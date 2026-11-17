@@ -156,7 +156,7 @@ export function Editor({
         <fieldset key={`calorie-${index}`}>
           <legend>Calories for {item.name || `item ${index + 1}`}</legend>
           {item.label && (
-            <details>
+            <details open={!item.label.reviewed}>
               <summary>
                 Scanned label{" "}
                 {item.label.reviewed ? "(reviewed)" : "(unreviewed)"}

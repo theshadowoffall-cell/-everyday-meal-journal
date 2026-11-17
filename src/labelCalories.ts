@@ -8,7 +8,18 @@ export function extractLabelCalories(text: string): CalorieValue | undefined {
   if (calorieLines.length !== 1) return undefined;
   // Reject multiple columns, units such as kJ, negative values, and ambiguous
   // thousands separators instead of interpreting OCR text as certain calories.
-  const value = calorieLines[0].match(
+  const calorieLine = calorieLines[0];
+  const lineIndex = lines.indexOf(calorieLine);
+  // OCR sometimes puts the calorie number on the next line. Accept only one
+  // isolated number, never multiple columns or a second unlabeled number.
+  const nextLines = lines.slice(lineIndex + 1).filter(Boolean);
+  const splitValue =
+    /^calories\s*:?$/i.test(calorieLine) &&
+    nextLines[0] &&
+    !/^\d+(?:[.,]\d+)?(?:\s*kcal)?$/i.test(nextLines[1] || "")
+      ? `Calories ${nextLines[0]}`
+      : calorieLine;
+  const value = splitValue.match(
     /^calories\s*:?\s*(\d+(?:[.,]\d{1,2})?)\s*(?:kcal)?\s*$/i,
   );
   if (!value) return undefined;

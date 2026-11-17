@@ -13,6 +13,7 @@ import {
 } from "@testing-library/react";
 import { App } from "../src/App";
 import { Voice, Scan } from "../src/InputFlows";
+import { recognize } from "../src/ocr";
 import { JournalDB } from "../src/storage";
 import { fixture, freeze } from "./fixtures";
 Object.assign(globalThis, { Blob: NodeBlob, React });
@@ -416,4 +417,79 @@ it("stores an ambiguous scan as unknown calories, not a guessed value", async ()
     cleanup();
     await db.close();
   }
+});
+it("uses a manually reviewed scan and preserves its calories in the saved meal", async () => {
+  freeze();
+  const db = new JournalDB("manual-scan-" + crypto.randomUUID(), () => {});
+  try {
+    render(<App database={db} />);
+    await screen.findByRole("heading", { name: "Today" });
+    fireEvent.click(screen.getByRole("button", { name: "Add meal" }));
+    await screen.findByRole("dialog");
+    fireEvent.click(screen.getByRole("button", { name: "Scan label" }));
+    fireEvent.change(screen.getByLabelText("Camera or photo"), {
+      target: { files: [new File(["x"], "label.jpg", { type: "image/jpeg" })] },
+    });
+    await screen.findByAltText(
+      "Selected label. Check readability before scanning.",
+    );
+    await waitFor(() => expect(finish).toBeTypeOf("function"));
+    await act(async () =>
+      finish("Nutrition Facts\nPer 175 g\nCalories\n150\nProtein 12 g"),
+    );
+    expect(screen.getByText(/Detected 150 kcal per 175 g/)).toBeTruthy();
+    expect(
+      (screen.getByRole("button", { name: "Use in meal" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    fireEvent.click(screen.getByLabelText("I reviewed this text"));
+    fireEvent.click(screen.getByRole("button", { name: "Use in meal" }));
+    await screen.findByRole("dialog", { name: "Add meal" });
+    await waitFor(async () =>
+      expect((await db.read()).drafts[0].items).toHaveLength(1),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Save meal" }));
+    await waitFor(async () => expect((await db.read()).meals).toHaveLength(1));
+    const data = await db.read();
+    expect(data.meals[0].items[0]).toMatchObject({
+      calorie: {
+        calories: 150,
+        basisQuantity: 175,
+        unit: "g",
+        source: "Scanned label (reviewed)",
+      },
+      label: { reviewed: true },
+    });
+    expect(data.images).toHaveLength(1);
+  } finally {
+    cleanup();
+    await db.close();
+  }
+});
+
+it("reports scanner failures even when the OCR worker rejects with text", async () => {
+  vi.mocked(recognize).mockRejectedValueOnce("Worker failed to load");
+  render(
+    <Scan
+      foods={[]}
+      close={() => {}}
+      save={async (f) => f}
+      add={() => {}}
+      autoUse={async () => {}}
+    />,
+  );
+  fireEvent.change(screen.getByLabelText("Camera or photo"), {
+    target: { files: [new File(["x"], "label.jpg", { type: "image/jpeg" })] },
+  });
+  expect((await screen.findByRole("alert")).textContent).toContain(
+    "Worker failed to load",
+  );
+  expect(screen.getByText(/Scan stopped/)).toBeTruthy();
+  expect(
+    (
+      screen.getByRole("button", {
+        name: "Extract label text",
+      }) as HTMLButtonElement
+    ).disabled,
+  ).toBe(false);
 });

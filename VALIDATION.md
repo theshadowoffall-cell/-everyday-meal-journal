@@ -70,3 +70,10 @@ The meal editor defaults to documented portions when available; 100 g remains th
 ## Scanner, voice and food-search stress checks
 
 Hardened automatic calorie extraction to reject ambiguous multi-column values, kJ, negative numbers and ambiguous separators. Late speech results after an end event and malformed alternatives are ignored. Search explains empty results and documented serving defaults. Preserved existing food databases, records and aliases. Production build and asset checks passed; 80 automated tests passed with simulated browser speech, scan callbacks, cancellations, failed writes and database-backed drafts. Real Tesseract CPU OCR read a synthetic clear calorie label, rejected a two-column label and left a missing calorie value unknown. These are synthetic images and jsdom/fake IndexedDB checks, not real phone, microphone, camera or native browser tests. Packaged barcode lookup is not integrated.
+
+
+## Scanner repair
+
+Both input modes now start OCR after photo selection; manual mode shows detected calories and adds a reviewed label and values to the meal draft, while automatic mode shows the unreviewed text directly in the draft. Silent worker failures (including string rejections) now surface an error and allow retry; progress is shown while loading. Compatible image formats may be selected and are converted to JPEG after device decoding. The calorie parser recognizes an unambiguous number on the line after Calories but rejects multiple columns. Existing user records are unchanged.
+
+Production build, asset checks and 83 automated tests passed. Headless Chromium at a phone-sized viewport exercised real bundled OCR with synthetic images in both modes, saved 150 kcal and verified it after reload; automatic mode was also checked using the production build under a subdirectory. A blocked-worker browser test verified a visible error and retry state. These checks are not an iPhone camera or Safari test; HEIC decoding depends on device support and complex or unclear labels can remain unknown.

@@ -23,3 +23,8 @@ Owner supplied https://github.com/theshadowoffall-cell/-everyday-meal-journal . 
 ## Live deployment verified
 
 Owner set Pages to main /docs. GitHub reported built; exact HTTPS root and all 18 production assets returned 200 and matched local build hashes. No runtime changes. iPhone and rendered layout checks remain pending.
+
+
+## App-scale interaction update
+
+User requested disabling zoom. Added viewport scale restrictions, touch-action rules that preserve panning, Safari gesture/multi-touch guards, and 16px file-input text to avoid focus zoom. Device accessibility overrides may still control zoom. TypeScript/Vite production build and portable asset checks passed; native iPhone gesture verification remains pending.

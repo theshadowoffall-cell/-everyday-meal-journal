@@ -9,3 +9,8 @@ Verification recorded 2026-11-17T04:45:50.111479+00:00: the exact public root UR
 These are live HTTP/asset checks, not a rendered-browser or iPhone test. Native Safari/Home Screen speech, camera, OCR worker execution, downloads, storage durability, keyboard and screenshot checks remain outstanding as described in VALIDATION.md. No application code changed during deployment.
 
 Open the live URL in Safari, then Share → Add to Home Screen. Keep this origin stable and export local records regularly. Personal records remain in each visitor's browser; they are not in the public repository.
+
+
+## Zoom interaction update
+
+Viewport scaling, pinch and double-tap gestures are restricted at the user’s request. One-finger scrolling stays enabled. Safari gesture guards supplement viewport/CSS controls; device accessibility overrides can still apply. TypeScript, production build and asset checks passed. Real iPhone gesture testing remains unverified.

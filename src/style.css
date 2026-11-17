@@ -413,7 +413,7 @@ textarea {
   min-height: 80px;
 }
 input[type="file"] {
-  font-size: 0.8rem !important;
+  font-size: 1rem !important;
   padding: 9px !important;
 }
 input[type="checkbox"],
@@ -847,4 +847,9 @@ strong {
 }
 body {
   overflow-wrap: break-word;
+}
+
+/* Keep the journal at app scale while preserving one-finger scrolling. */
+html, body, #root {
+  touch-action: pan-x pan-y;
 }
